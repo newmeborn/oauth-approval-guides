@@ -1,0 +1,1257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "developerPortalUrl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "website",
+        "developerPortalUrl"
+      ],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "generatedBy": {
+          "type": "string",
+          "enum": [
+            "agent",
+            "human_verified"
+          ],
+          "description": "agent: docs and web research only. human_verified: a person walked the flow."
+        },
+        "lastChecked": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+          "description": "ISO date, YYYY-MM-DD."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Two sentences: overall verdict and the single most important thing to know."
+        }
+      },
+      "required": [
+        "generatedBy",
+        "lastChecked",
+        "summary"
+      ],
+      "additionalProperties": false
+    },
+    "accessLevels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable kebab-case id, unique within the guide, e.g. 'bot-verification'."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sign_in",
+              "read",
+              "write"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Plain-language capability, e.g. 'Post messages to a team's channel'."
+          },
+          "mechanism": {
+            "type": "string",
+            "description": "How access is granted, e.g. 'user OAuth token', 'bot added to server', 'incoming webhook'."
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Provider scope or permission strings."
+          },
+          "gateIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Every gate this access level must pass, including registration."
+          },
+          "activeEffort": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "description": "Null when unknown. Never invent a number to fill it.",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "max": {
+                "description": "Null when unknown or open-ended.",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "minutes",
+                  "hours",
+                  "days",
+                  "weeks",
+                  "months"
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "enum": [
+                      "tested",
+                      "documented",
+                      "reported",
+                      "unverified"
+                    ],
+                    "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Sources backing the claim. May be empty only when label is unverified."
+                  },
+                  "note": {
+                    "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "sourceIds",
+                  "note"
+                ],
+                "additionalProperties": false,
+                "description": "Shown inline next to every claim."
+              }
+            },
+            "required": [
+              "min",
+              "max",
+              "unit",
+              "evidence"
+            ],
+            "additionalProperties": false,
+            "description": "Hands-on developer time to reach launch, excluding waiting."
+          },
+          "calendarWaitToLaunch": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "description": "Null when unknown. Never invent a number to fill it.",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "max": {
+                "description": "Null when unknown or open-ended.",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "unit": {
+                "type": "string",
+                "enum": [
+                  "minutes",
+                  "hours",
+                  "days",
+                  "weeks",
+                  "months"
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "enum": [
+                      "tested",
+                      "documented",
+                      "reported",
+                      "unverified"
+                    ],
+                    "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Sources backing the claim. May be empty only when label is unverified."
+                  },
+                  "note": {
+                    "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "sourceIds",
+                  "note"
+                ],
+                "additionalProperties": false,
+                "description": "Shown inline next to every claim."
+              }
+            },
+            "required": [
+              "min",
+              "max",
+              "unit",
+              "evidence"
+            ],
+            "additionalProperties": false,
+            "description": "Waiting on the provider before real users can connect."
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "One line, e.g. 'Start verification now; launch with test users meanwhile.'"
+          },
+          "composioToolkit": {
+            "description": "Composio toolkit slug that serves this level, e.g. 'DISCORDBOT'.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "tested",
+                  "documented",
+                  "reported",
+                  "unverified"
+                ],
+                "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sources backing the claim. May be empty only when label is unverified."
+              },
+              "note": {
+                "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "sourceIds",
+              "note"
+            ],
+            "additionalProperties": false,
+            "description": "Shown inline next to every claim."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "mechanism",
+          "scopes",
+          "gateIds",
+          "activeEffort",
+          "calendarWaitToLaunch",
+          "recommendation",
+          "composioToolkit",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable kebab-case id, unique within the guide, e.g. 'bot-verification'."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "legal_entity",
+              "privacy_policy_url",
+              "terms_url",
+              "verified_domain",
+              "paid_plan",
+              "developer_account",
+              "admin_account",
+              "end_user_account",
+              "end_user_permission",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "whoNeedsIt": {
+            "type": "string",
+            "enum": [
+              "developer",
+              "end_user"
+            ]
+          },
+          "blocking": {
+            "type": "boolean",
+            "description": "True if you cannot proceed at all without it."
+          },
+          "accessLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Empty means it applies to every access level."
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "tested",
+                  "documented",
+                  "reported",
+                  "unverified"
+                ],
+                "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sources backing the claim. May be empty only when label is unverified."
+              },
+              "note": {
+                "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "sourceIds",
+              "note"
+            ],
+            "additionalProperties": false,
+            "description": "Shown inline next to every claim."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "description",
+          "whoNeedsIt",
+          "blocking",
+          "accessLevelIds",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable kebab-case id, unique within the guide, e.g. 'bot-verification'."
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "agent_prepares",
+              "developer"
+            ],
+            "description": "agent: an agent can do it end to end. agent_prepares: an agent drafts it, the developer submits. developer: only the developer can (logins, ID checks, accepting terms, payments)."
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "accessLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Empty means the step applies to every access level."
+          },
+          "gateId": {
+            "description": "The gate this step satisfies, if any.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "tested",
+                  "documented",
+                  "reported",
+                  "unverified"
+                ],
+                "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sources backing the claim. May be empty only when label is unverified."
+              },
+              "note": {
+                "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "sourceIds",
+              "note"
+            ],
+            "additionalProperties": false,
+            "description": "Shown inline next to every claim."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "detail",
+          "actor",
+          "url",
+          "accessLevelIds",
+          "gateId",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable kebab-case id, unique within the guide, e.g. 'bot-verification'."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "account_security",
+              "policy_urls",
+              "domain_verification",
+              "brand_verification",
+              "identity_verification",
+              "use_case_review",
+              "security_assessment",
+              "business_verification",
+              "paid_access",
+              "partner_program"
+            ],
+            "description": "Pick the kind by what the provider actually checks, not by what the provider calls it."
+          },
+          "name": {
+            "type": "string",
+            "description": "The provider's own name for it, e.g. 'App Verification'."
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "development",
+              "launch",
+              "scale"
+            ],
+            "description": "development: before even you can test. launch: before real users outside a test list can connect. scale: only after a usage threshold (put it in threshold)."
+          },
+          "threshold": {
+            "description": "For scale gates, e.g. '100 servers'. Otherwise null.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "startUrl": {
+            "description": "Where the developer starts this gate.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "typicalWait": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "description": "Null when unknown. Never invent a number to fill it.",
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "max": {
+                    "description": "Null when unknown or open-ended.",
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "unit": {
+                    "type": "string",
+                    "enum": [
+                      "minutes",
+                      "hours",
+                      "days",
+                      "weeks",
+                      "months"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "enum": [
+                          "tested",
+                          "documented",
+                          "reported",
+                          "unverified"
+                        ],
+                        "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                      },
+                      "sourceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Sources backing the claim. May be empty only when label is unverified."
+                      },
+                      "note": {
+                        "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "sourceIds",
+                      "note"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Shown inline next to every claim."
+                  }
+                },
+                "required": [
+                  "min",
+                  "max",
+                  "unit",
+                  "evidence"
+                ],
+                "additionalProperties": false,
+                "description": "A range, never a point estimate. Use the unit a developer would plan in."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Calendar wait for a decision. Null if the gate is instant."
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "evidence": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "type": "string",
+                        "enum": [
+                          "tested",
+                          "documented",
+                          "reported",
+                          "unverified"
+                        ],
+                        "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                      },
+                      "sourceIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "Sources backing the claim. May be empty only when label is unverified."
+                      },
+                      "note": {
+                        "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "label",
+                      "sourceIds",
+                      "note"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Shown inline next to every claim."
+                  }
+                },
+                "required": [
+                  "text",
+                  "evidence"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Money cost, if any."
+          },
+          "reviewerChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "enum": [
+                        "tested",
+                        "documented",
+                        "reported",
+                        "unverified"
+                      ],
+                      "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                    },
+                    "sourceIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Sources backing the claim. May be empty only when label is unverified."
+                    },
+                    "note": {
+                      "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "sourceIds",
+                    "note"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Shown inline next to every claim."
+                }
+              },
+              "required": [
+                "text",
+                "evidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "rejectionReasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "enum": [
+                        "tested",
+                        "documented",
+                        "reported",
+                        "unverified"
+                      ],
+                      "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                    },
+                    "sourceIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Sources backing the claim. May be empty only when label is unverified."
+                    },
+                    "note": {
+                      "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "sourceIds",
+                    "note"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Shown inline next to every claim."
+                }
+              },
+              "required": [
+                "reason",
+                "fix",
+                "evidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "tested",
+                  "documented",
+                  "reported",
+                  "unverified"
+                ],
+                "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sources backing the claim. May be empty only when label is unverified."
+              },
+              "note": {
+                "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "sourceIds",
+              "note"
+            ],
+            "additionalProperties": false,
+            "description": "Shown inline next to every claim."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "phase",
+          "threshold",
+          "description",
+          "startUrl",
+          "typicalWait",
+          "cost",
+          "reviewerChecks",
+          "rejectionReasons",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fallbackWhilePending": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "tested",
+                  "documented",
+                  "reported",
+                  "unverified"
+                ],
+                "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Sources backing the claim. May be empty only when label is unverified."
+              },
+              "note": {
+                "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "label",
+              "sourceIds",
+              "note"
+            ],
+            "additionalProperties": false,
+            "description": "Shown inline next to every claim."
+          }
+        },
+        "required": [
+          "text",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "description": "How to keep building or launch while a gate is pending."
+    },
+    "composio": {
+      "type": "object",
+      "properties": {
+        "toolkits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "accessLevelIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Ids of access levels defined elsewhere in this guide."
+              },
+              "managedAuthAvailable": {
+                "description": "Null if not checked.",
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "authScheme": {
+                "description": "e.g. 'OAUTH2'.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customCredentials": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "What the developer pastes into the auth config, e.g. 'client_id'."
+              },
+              "whyGoCustom": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "evidence": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "enum": [
+                            "tested",
+                            "documented",
+                            "reported",
+                            "unverified"
+                          ],
+                          "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                        },
+                        "sourceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Sources backing the claim. May be empty only when label is unverified."
+                        },
+                        "note": {
+                          "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "label",
+                        "sourceIds",
+                        "note"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Shown inline next to every claim."
+                    }
+                  },
+                  "required": [
+                    "text",
+                    "evidence"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "What the developer gets from their own app over Composio's managed one."
+              },
+              "evidence": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "enum": [
+                      "tested",
+                      "documented",
+                      "reported",
+                      "unverified"
+                    ],
+                    "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Sources backing the claim. May be empty only when label is unverified."
+                  },
+                  "note": {
+                    "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "sourceIds",
+                  "note"
+                ],
+                "additionalProperties": false,
+                "description": "Shown inline next to every claim."
+              }
+            },
+            "required": [
+              "slug",
+              "accessLevelIds",
+              "managedAuthAvailable",
+              "authScheme",
+              "customCredentials",
+              "whyGoCustom",
+              "evidence"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "redirectUri": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "evidence": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "enum": [
+                        "tested",
+                        "documented",
+                        "reported",
+                        "unverified"
+                      ],
+                      "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                    },
+                    "sourceIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Sources backing the claim. May be empty only when label is unverified."
+                    },
+                    "note": {
+                      "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "label",
+                    "sourceIds",
+                    "note"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Shown inline next to every claim."
+                }
+              },
+              "required": [
+                "text",
+                "evidence"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The callback to register in the provider portal."
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "enum": [
+                      "tested",
+                      "documented",
+                      "reported",
+                      "unverified"
+                    ],
+                    "description": "tested: we did it ourselves (needs a screenshot or test_log source). documented: an official provider or Composio page says so. reported: community sources (forums, blogs, Stack Overflow). unverified: inference or a source we could not read."
+                  },
+                  "sourceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Sources backing the claim. May be empty only when label is unverified."
+                  },
+                  "note": {
+                    "description": "Caveats, e.g. 'page blocked automated fetch; seen via search excerpt'.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "label",
+                  "sourceIds",
+                  "note"
+                ],
+                "additionalProperties": false,
+                "description": "Shown inline next to every claim."
+              }
+            },
+            "required": [
+              "text",
+              "evidence"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "toolkits",
+        "redirectUri",
+        "notes"
+      ],
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable kebab-case id, unique within the guide, e.g. 'bot-verification'."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "provider_doc",
+              "provider_console",
+              "composio_doc",
+              "composio_api",
+              "community",
+              "screenshot",
+              "test_log"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string",
+            "description": "URL, or repo-relative path for screenshots and test logs."
+          },
+          "accessedOn": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "description": "ISO date, YYYY-MM-DD."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "location",
+          "accessedOn"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "openQuestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "whyItMatters": {
+            "type": "string"
+          },
+          "howToResolve": {
+            "type": "string",
+            "enum": [
+              "test",
+              "ask_provider",
+              "community",
+              "ask_composio"
+            ]
+          }
+        },
+        "required": [
+          "question",
+          "whyItMatters",
+          "howToResolve"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "app",
+    "provenance",
+    "accessLevels",
+    "prerequisites",
+    "steps",
+    "gates",
+    "fallbackWhilePending",
+    "composio",
+    "sources",
+    "openQuestions"
+  ],
+  "additionalProperties": false,
+  "$id": "https://composio-oauth-guides/schema/guide-1.0.0.json",
+  "title": "OAuth app setup & approval guide"
+}

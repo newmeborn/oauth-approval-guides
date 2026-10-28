@@ -1,0 +1,888 @@
+{
+  "schemaVersion": "1.0.0",
+  "app": {
+    "name": "Discord",
+    "slug": "discord",
+    "website": "https://discord.com",
+    "developerPortalUrl": "https://discord.com/developers/applications"
+  },
+  "provenance": {
+    "generatedBy": "agent",
+    "lastChecked": "2026-10-28",
+    "summary": "Predicted self-serve for sign-in and for posting to a team's channel: you can launch the same day with no review. The wall comes at scale: once your bot is in 100 servers (for a team app, roughly 100 teams) Discord requires app verification with a government ID check of the team owner, so plan it before you get there."
+  },
+  "accessLevels": [
+    {
+      "id": "sign-in",
+      "kind": "sign_in",
+      "name": "Sign in with Discord / identify the user",
+      "mechanism": "user OAuth token (authorization code grant)",
+      "scopes": [
+        "identify",
+        "email"
+      ],
+      "gateIds": [
+        "register-app"
+      ],
+      "activeEffort": {
+        "min": 15,
+        "max": 45,
+        "unit": "minutes",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate from the number of portal steps; to be timed in the hands-on run."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "discord-oauth2"
+          ],
+          "note": "The OAuth2 doc lists approval requirements only for partner-only and restricted scopes; identify and email are not among them."
+        }
+      },
+      "recommendation": "Self-serve. Register the app and go; no review stands between you and real users.",
+      "composioToolkit": "DISCORD",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2",
+          "composio-discord"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "post-to-channel",
+      "kind": "write",
+      "name": "Post messages to a team's server channel",
+      "mechanism": "bot added to the team's server by someone with install rights, then posts via the bot token",
+      "scopes": [
+        "bot",
+        "permissions: VIEW_CHANNEL (1024) + SEND_MESSAGES (2048) = 3072"
+      ],
+      "gateIds": [
+        "register-app",
+        "app-verification"
+      ],
+      "activeEffort": {
+        "min": 0.5,
+        "max": 2,
+        "unit": "hours",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate: app + bot setup, install URL, Composio auth config, one test message."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "discord-oauth2",
+            "discord-verification-help"
+          ],
+          "note": "No review before launch; verification only binds at 100 servers."
+        }
+      },
+      "recommendation": "Self-serve to launch. Start app verification (team + owner ID check) well before you reach 100 teams, because unverified bots cannot join more servers past that.",
+      "composioToolkit": "DISCORDBOT",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2",
+          "discord-permissions",
+          "composio-discordbot"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "post-via-webhook",
+      "kind": "write",
+      "name": "Post messages to one chosen channel, without a bot",
+      "mechanism": "incoming webhook: the user picks a channel during OAuth and the token response returns that channel's webhook URL",
+      "scopes": [
+        "webhook.incoming"
+      ],
+      "gateIds": [
+        "register-app"
+      ],
+      "activeEffort": {
+        "min": 0.5,
+        "max": 2,
+        "unit": "hours",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate; depends on whether Composio can run this flow."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "discord-oauth2"
+          ],
+          "note": "No approval listed for webhook.incoming."
+        }
+      },
+      "recommendation": "If your agent only posts, prefer this: no bot in the member list, and likely no 100-server verification. Confirm Composio support first.",
+      "composioToolkit": null,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2",
+          "discord-webhook"
+        ],
+        "note": "Whether webhooks count toward the unverified bot's 100-server cap is unconfirmed. DISCORDBOT_EXECUTE_WEBHOOK can post with a webhook id and token, but whether a Composio auth config can request webhook.incoming is unknown."
+      }
+    },
+    {
+      "id": "read-messages",
+      "kind": "read",
+      "name": "Read the content of a team's channel messages",
+      "mechanism": "bot in the server with the Message Content privileged intent enabled",
+      "scopes": [
+        "bot",
+        "permissions: VIEW_CHANNEL + READ_MESSAGE_HISTORY",
+        "intent: MESSAGE_CONTENT (privileged)"
+      ],
+      "gateIds": [
+        "register-app",
+        "app-verification",
+        "privileged-intent-review"
+      ],
+      "activeEffort": {
+        "min": 1,
+        "max": 3,
+        "unit": "hours",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate; excludes writing the intent-review submission, which only applies past 10,000 users."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "discord-intent-review"
+          ],
+          "note": "Review is only required once unique users who can see the app exceed 10,000; below that the intent is toggled in the portal (toggle behaviour itself to be confirmed in the run)."
+        }
+      },
+      "recommendation": "Avoid it if you can: slash commands, @mentions and DMs to the bot deliver content without the intent. If you need it, expect an annual use-case review once you pass 10,000 users.",
+      "composioToolkit": "DISCORDBOT",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-intent-review",
+          "discord-no-intent-needed"
+        ],
+        "note": "Not needed by a post-only agent; included because it is the common next ask and shows how difficulty changes with access level."
+      }
+    }
+  ],
+  "prerequisites": [
+    {
+      "id": "discord-account",
+      "kind": "developer_account",
+      "description": "A Discord account to sign in to the Developer Portal and own the application.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": [],
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [],
+        "note": "Implied by the portal; whether a verified email or phone is required at creation is to be checked."
+      }
+    },
+    {
+      "id": "two-factor",
+      "kind": "developer_account",
+      "description": "2FA on your Discord account. Required to create a Developer Team, and a team is required for app verification. Not needed to launch.",
+      "whoNeedsIt": "developer",
+      "blocking": false,
+      "accessLevelIds": [
+        "post-to-channel",
+        "read-messages"
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-teams",
+          "discord-verification-help"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "owner-id",
+      "kind": "other",
+      "description": "For verification: the team owner must be 16+ and pass a Stripe identity check with a government ID that Stripe supports for their country.",
+      "whoNeedsIt": "developer",
+      "blocking": false,
+      "accessLevelIds": [
+        "post-to-channel",
+        "read-messages"
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-verification-help",
+          "discord-verification-faq"
+        ],
+        "note": "Help Center pages block automated fetch; content seen via search excerpts."
+      }
+    },
+    {
+      "id": "installer-rights",
+      "kind": "end_user_permission",
+      "description": "The person who connects a team must have rights to add apps to that server (likely 'Manage Server'). For a team app this means a team admin or captain connects the team, not every player.",
+      "whoNeedsIt": "end_user",
+      "blocking": true,
+      "accessLevelIds": [
+        "post-to-channel",
+        "read-messages"
+      ],
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "discord-oauth2"
+        ],
+        "note": "The doc only says the user needs 'proper permissions' in the guild; the exact permission is to be tested."
+      }
+    },
+    {
+      "id": "webhook-rights",
+      "kind": "end_user_permission",
+      "description": "The person connecting must be able to manage webhooks in the chosen channel's server.",
+      "whoNeedsIt": "end_user",
+      "blocking": true,
+      "accessLevelIds": [
+        "post-via-webhook"
+      ],
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "discord-webhook"
+        ],
+        "note": "MANAGE_WEBHOOKS is documented for creating webhooks via the API; assumed to apply to the OAuth flow too."
+      }
+    },
+    {
+      "id": "channel-permissions",
+      "kind": "end_user_permission",
+      "description": "The bot's role must be able to view and send in the target channel. Channel overrides that deny VIEW_CHANNEL silently block it.",
+      "whoNeedsIt": "end_user",
+      "blocking": true,
+      "accessLevelIds": [
+        "post-to-channel"
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-permissions"
+        ],
+        "note": null
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "create-app",
+      "title": "Create the application",
+      "detail": "Sign in to the Developer Portal, click New Application, name it after your product (this name and icon are what users see on the consent screen and in their server).",
+      "actor": "developer",
+      "url": "https://discord.com/developers/applications",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2"
+        ],
+        "note": "Whether this step shows a terms-acceptance screen is to be confirmed."
+      }
+    },
+    {
+      "id": "set-redirect",
+      "title": "Copy credentials and add Composio's redirect URI",
+      "detail": "OAuth2 page: copy Client ID and Client Secret; under Redirects add the callback shown in your Composio auth config, character for character.",
+      "actor": "developer",
+      "url": "https://discord.com/developers/applications",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2"
+        ],
+        "note": "The redirect_uri must match a registered URL exactly."
+      }
+    },
+    {
+      "id": "configure-bot",
+      "title": "Configure the bot user",
+      "detail": "Bot page: reset and copy the bot token, keep Public Bot on so team admins other than you can install it, leave every privileged intent off.",
+      "actor": "developer",
+      "url": "https://discord.com/developers/applications",
+      "accessLevelIds": [
+        "post-to-channel",
+        "read-messages"
+      ],
+      "gateId": null,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2",
+          "discord-no-intent-needed"
+        ],
+        "note": "Default state of Public Bot on a new app is to be checked."
+      }
+    },
+    {
+      "id": "build-install-url",
+      "title": "Build the bot install link",
+      "detail": "https://discord.com/oauth2/authorize?client_id=<CLIENT_ID>&scope=bot&permissions=3072 (View Channel + Send Messages, nothing more). Asking for fewer permissions keeps the install screen short and avoids 2FA-gated permissions.",
+      "actor": "agent",
+      "url": null,
+      "accessLevelIds": [
+        "post-to-channel"
+      ],
+      "gateId": null,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2",
+          "discord-permissions"
+        ],
+        "note": "When Composio drives the flow it builds this URL itself; this is for manual testing."
+      }
+    },
+    {
+      "id": "composio-auth-config",
+      "title": "Create the Composio auth configs",
+      "detail": "Create a DISCORDBOT auth config with your own credentials (and a DISCORD one if you also want sign-in). Paste the client ID, secret and, if asked, the bot token. Pass the ac_ ids into your session's auth_configs.",
+      "actor": "agent_prepares",
+      "url": "https://platform.composio.dev",
+      "accessLevelIds": [],
+      "gateId": null,
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "composio-auth-configs"
+        ],
+        "note": "Exact fields for DISCORDBOT (whether a bot token is requested) not documented on the toolkit page."
+      }
+    },
+    {
+      "id": "test-install",
+      "title": "Install in a test server and send one message",
+      "detail": "Open the Connect Link, choose a server you admin, authorize. Then have the agent call DISCORDBOT_CREATE_MESSAGE with a channel_id. Clicking Authorize is yours; the message call is the agent's.",
+      "actor": "developer",
+      "url": null,
+      "accessLevelIds": [
+        "post-to-channel"
+      ],
+      "gateId": null,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "composio-discordbot"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "verify-before-100",
+      "title": "Verify the app before 100 servers",
+      "detail": "Enable 2FA, create a Developer Team, transfer the app to it (irreversible), then apply on the App Verification page; the team owner completes the Stripe ID check.",
+      "actor": "developer",
+      "url": "https://discord.com/developers/applications",
+      "accessLevelIds": [
+        "post-to-channel",
+        "read-messages"
+      ],
+      "gateId": "app-verification",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-teams",
+          "discord-verification-help",
+          "discord-discovery"
+        ],
+        "note": "Earliest eligibility (reported as 76 servers) not confirmed for 2026."
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "register-app",
+      "kind": "registration",
+      "name": "Create application",
+      "phase": "development",
+      "threshold": null,
+      "description": "Create an application in the Developer Portal; it gets a client ID, secret and optional bot user immediately.",
+      "startUrl": "https://discord.com/developers/applications",
+      "typicalWait": null,
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-oauth2"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "app-verification",
+      "kind": "identity_verification",
+      "name": "App Verification",
+      "phase": "scale",
+      "threshold": "100 servers",
+      "description": "Unverified bots are capped at 100 servers. Verification lifts the cap and requires the app to be owned by a Developer Team whose owner passes a Stripe ID check.",
+      "startUrl": "https://discord.com/developers/applications",
+      "typicalWait": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "No official timeline found; to research in community sources and record during the run."
+        }
+      },
+      "cost": null,
+      "reviewerChecks": [
+        {
+          "text": "The team owner's identity, via a Stripe government-ID check; periodic re-verification may be requested.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-verification-help"
+            ],
+            "note": "Seen via search excerpt; page blocks automated fetch."
+          }
+        },
+        {
+          "text": "The app belongs to a Developer Team.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-verification-help"
+            ],
+            "note": "Seen via search excerpt."
+          }
+        },
+        {
+          "text": "Whatever else the portal's App Verification checklist lists (policy URLs, terms compliance are plausible but unconfirmed).",
+          "evidence": {
+            "label": "unverified",
+            "sourceIds": [
+              "discord-discovery"
+            ],
+            "note": "The docs say requirements are listed on the portal page; read them off the portal in the run."
+          }
+        }
+      ],
+      "rejectionReasons": [
+        {
+          "reason": "Stripe cannot verify the owner's ID (some countries' ID types unsupported).",
+          "fix": "Transfer team ownership to a person whose ID Stripe supports, then reapply.",
+          "evidence": {
+            "label": "reported",
+            "sourceIds": [
+              "community-kyc"
+            ],
+            "note": "Anecdotal forum reports."
+          }
+        },
+        {
+          "reason": "Applicant under 16.",
+          "fix": "An adult (16+) team owner must apply.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-verification-faq"
+            ],
+            "note": "Seen via search excerpt."
+          }
+        }
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-verification-help",
+          "discord-oauth2"
+        ],
+        "note": "The OAuth2 doc confirms 'Verified bots do not have a maximum number of guilds'; the 100 figure comes from the Help Center."
+      }
+    },
+    {
+      "id": "privileged-intent-review",
+      "kind": "use_case_review",
+      "name": "Privileged Intent review",
+      "phase": "scale",
+      "threshold": "10,000+ users",
+      "description": "Apps that can be seen by more than 10,000 unique users must justify each privileged intent, describe data handling, and reapply every year. Discord changed this threshold from 100 servers on 2026-06-10, so older guides are out of date.",
+      "startUrl": "https://discord.com/developers/applications",
+      "typicalWait": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "discord-intent-review"
+          ],
+          "note": "No processing time stated. You have 90 days from notice to apply, and the app keeps working while in review."
+        }
+      },
+      "cost": null,
+      "reviewerChecks": [
+        {
+          "text": "A specific use case per intent, including why interactions can't do the job.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-intent-review"
+            ],
+            "note": null
+          }
+        },
+        {
+          "text": "How you handle the data: storage, retention, security, or that it is processed in memory and discarded.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-intent-review"
+            ],
+            "note": null
+          }
+        },
+        {
+          "text": "Screenshots or video of the feature in action.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-intent-review"
+            ],
+            "note": null
+          }
+        }
+      ],
+      "rejectionReasons": [
+        {
+          "reason": "The use case could be served by interactions or other means.",
+          "fix": "Redesign around slash commands, mentions or DMs, or explain concretely why they don't work.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-intent-review"
+            ],
+            "note": null
+          }
+        },
+        {
+          "reason": "Submission unclear or incomplete.",
+          "fix": "Resubmit with per-intent detail and a screencast.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "discord-intent-review"
+            ],
+            "note": null
+          }
+        }
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-intent-review"
+        ],
+        "note": null
+      }
+    }
+  ],
+  "fallbackWhilePending": [
+    {
+      "text": "Privileged intent review: the app keeps its requested intents and keeps growing while the submission is under review.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "discord-intent-review"
+        ],
+        "note": null
+      }
+    },
+    {
+      "text": "App verification: no documented grace period. Apply early (before 100 servers) so new teams aren't blocked from installing.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "discord-verification-help"
+        ],
+        "note": "Behaviour at the cap while an application is pending is unknown."
+      }
+    },
+    {
+      "text": "Composio-managed DISCORDBOT auth works today, so a prototype can ship on it while your own app is set up (with Composio's branding).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "composio-discordbot"
+        ],
+        "note": "Managed availability per the toolkit page; branding shown to users is to be tested."
+      }
+    }
+  ],
+  "composio": {
+    "toolkits": [
+      {
+        "slug": "DISCORD",
+        "accessLevelIds": [
+          "sign-in"
+        ],
+        "managedAuthAvailable": true,
+        "authScheme": "OAUTH2",
+        "customCredentials": [
+          "client_id",
+          "client_secret"
+        ],
+        "whyGoCustom": [
+          {
+            "text": "Your product's name and icon on the consent screen instead of Composio's.",
+            "evidence": {
+              "label": "documented",
+              "sourceIds": [
+                "composio-managed-vs-custom"
+              ],
+              "note": null
+            }
+          }
+        ],
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "composio-discord"
+          ],
+          "note": "None of the DISCORD toolkit's 28 actions sends a channel message."
+        }
+      },
+      {
+        "slug": "DISCORDBOT",
+        "accessLevelIds": [
+          "post-to-channel",
+          "read-messages"
+        ],
+        "managedAuthAvailable": true,
+        "authScheme": "OAUTH2",
+        "customCredentials": [
+          "client_id",
+          "client_secret",
+          "bot_token (unconfirmed)"
+        ],
+        "whyGoCustom": [
+          {
+            "text": "With managed auth, the bot that joins your users' servers is presumably Composio's, under its name and avatar, which matters more here than on a consent screen because it sits in the team's member list permanently.",
+            "evidence": {
+              "label": "unverified",
+              "sourceIds": [],
+              "note": "Inference; confirm by installing via managed auth in a test server."
+            }
+          }
+        ],
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "composio-discordbot"
+          ],
+          "note": "Send action: DISCORDBOT_CREATE_MESSAGE (needs SEND_MESSAGES and a channel_id)."
+        }
+      }
+    ],
+    "redirectUri": {
+      "text": "Use the callback the auth config screen shows. Composio docs show https://backend.composio.dev/api/v3/toolkits/auth/callback as current and https://backend.composio.dev/api/v1/auth-apps/add as a legacy default some toolkits still use.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "composio-auth-configs"
+        ],
+        "note": "Docs disagree across versions; which one DISCORDBOT uses is to be read from the dashboard."
+      }
+    },
+    "notes": [
+      {
+        "text": "Sign-in and posting are different toolkits (DISCORD vs DISCORDBOT), so a product needing both creates two auth configs, possibly backed by the same Discord application.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "composio-discord",
+            "composio-discordbot"
+          ],
+          "note": "Whether one Discord app can back both configs is to be tested."
+        }
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "discord-oauth2",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: OAuth2",
+      "location": "https://docs.discord.com/developers/topics/oauth2",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-permissions",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: Permissions",
+      "location": "https://docs.discord.com/developers/topics/permissions",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-webhook",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: Webhook resource",
+      "location": "https://docs.discord.com/developers/resources/webhook",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-teams",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: Teams",
+      "location": "https://docs.discord.com/developers/topics/teams",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-intent-review",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: Getting Started with Privileged Intent Review",
+      "location": "https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-no-intent-needed",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: You Might Not Need a Privileged Intent",
+      "location": "https://docs.discord.com/developers/gateway/you-might-not-need-a-privileged-intent",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-discovery",
+      "kind": "provider_doc",
+      "title": "Discord Developer Docs: Enabling Discovery (app verification section)",
+      "location": "https://docs.discord.com/developers/discovery/enabling-discovery",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-verification-help",
+      "kind": "provider_doc",
+      "title": "Discord Developer Help Center: Getting Your App Verified",
+      "location": "https://support-dev.discord.com/hc/en-us/articles/23926564536471",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "discord-verification-faq",
+      "kind": "provider_doc",
+      "title": "Discord Developer Help Center: Bot Verification FAQ for Parents, Legal Guardians and Other Sponsors",
+      "location": "https://support-dev.discord.com/hc/en-us/articles/6275923204375",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "community-kyc",
+      "kind": "community",
+      "title": "Discord community: Bot owner KYC verification",
+      "location": "https://support.discord.com/hc/en-us/community/posts/14164958013207",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "composio-discord",
+      "kind": "composio_doc",
+      "title": "Composio toolkit: Discord",
+      "location": "https://docs.composio.dev/toolkits/discord",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "composio-discordbot",
+      "kind": "composio_doc",
+      "title": "Composio toolkit: Discord Bot",
+      "location": "https://docs.composio.dev/toolkits/discordbot",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "composio-auth-configs",
+      "kind": "composio_doc",
+      "title": "Composio: Programmatic auth configs",
+      "location": "https://docs.composio.dev/docs/authentication/programmatic-auth-configs",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "composio-managed-vs-custom",
+      "kind": "composio_doc",
+      "title": "Composio: Managed vs custom auth",
+      "location": "https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app",
+      "accessedOn": "2026-10-28"
+    }
+  ],
+  "openQuestions": [
+    {
+      "question": "Does the DISCORDBOT custom auth config ask for a bot token as well as client ID and secret?",
+      "whyItMatters": "Decides the Composio hookup step and whether the token must be stored with Composio.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "Which redirect URI does the DISCORDBOT auth config show (v3 callback or legacy v1)?",
+      "whyItMatters": "A mismatch is the most common OAuth failure; the guide must give the exact string.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "With managed DISCORDBOT auth, whose name and avatar does the bot have in the user's server?",
+      "whyItMatters": "This is the main reason to go custom for a bot; if it is Composio-branded the case is strong.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "Exactly which server permission does a user need to install the bot (Manage Server?)",
+      "whyItMatters": "Decides who on a team can connect it: admins only, or any player.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "What does the portal's App Verification page list as requirements before you are eligible (privacy policy URL, terms URL, others)?",
+      "whyItMatters": "These become prerequisites; better to know on day one than at 99 servers.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "Is early application still possible at 76 servers, and how long does verification take in 2026?",
+      "whyItMatters": "Sets the calendar wait at scale, currently unknown.",
+      "howToResolve": "community"
+    },
+    {
+      "question": "Does posting via an incoming webhook (webhook.incoming scope) avoid the 100-server bot cap, and can Composio request that scope?",
+      "whyItMatters": "If yes, it is a no-bot, no-verification path for post-only agents.",
+      "howToResolve": "ask_provider"
+    },
+    {
+      "question": "Is app verification still separate from privileged intent review after the June 2026 change?",
+      "whyItMatters": "Determines whether a read-messages app faces one review or two.",
+      "howToResolve": "ask_provider"
+    }
+  ]
+}

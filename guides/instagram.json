@@ -1,0 +1,677 @@
+{
+  "schemaVersion": "1.0.0",
+  "app": {
+    "name": "Instagram",
+    "slug": "instagram",
+    "website": "https://www.instagram.com",
+    "developerPortalUrl": "https://developers.facebook.com/apps"
+  },
+  "provenance": {
+    "generatedBy": "human_verified",
+    "lastChecked": "2026-10-28",
+    "summary": "Gated: serving anyone else's Instagram account needs Advanced Access, which requires both App Review and Business Verification, and end users must have a Business or Creator account. We tested the end-user side through Composio's managed app (it works today but shows \"Composio-IG\" to your users); the developer-side Meta portal run is still to come, so those steps are from Meta's docs."
+  },
+  "accessLevels": [
+    {
+      "id": "read-profile",
+      "kind": "read",
+      "name": "Read the user's profile and media",
+      "mechanism": "Instagram API with Instagram Login, user access token.",
+      "scopes": [
+        "instagram_business_basic"
+      ],
+      "gateIds": [
+        "register-app",
+        "policy-urls",
+        "app-review",
+        "business-verification"
+      ],
+      "activeEffort": {
+        "min": 1,
+        "max": 2,
+        "unit": "days",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate: app setup plus a testable app, screencast, test instructions and Business Verification documents."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "reported",
+          "sourceIds": [
+            "community-review-times",
+            "community-bv-stuck"
+          ],
+          "note": "No official figure. 2026 reports: App Review grew from 1-3 days (2025) to 17-19 days (May 2026); Business Verification \"in review\" for 10+ days."
+        }
+      },
+      "recommendation": "Start Business Verification first, then App Review; test with your own accounts under Standard Access meanwhile.",
+      "composioToolkit": "INSTAGRAM",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-overview"
+        ],
+        "note": "Advanced Access: \"This access level requires App Review and Business Verification.\""
+      }
+    },
+    {
+      "id": "publish",
+      "kind": "write",
+      "name": "Publish posts (e.g. player cards)",
+      "mechanism": "Content publishing endpoints with the user's token; images must be public JPEG URLs.",
+      "scopes": [
+        "instagram_business_basic",
+        "instagram_business_content_publish"
+      ],
+      "gateIds": [
+        "register-app",
+        "policy-urls",
+        "app-review",
+        "business-verification"
+      ],
+      "activeEffort": {
+        "min": 1,
+        "max": 3,
+        "unit": "days",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [],
+          "note": "Agent estimate: as for reading, plus a working publish flow to record in the screencast."
+        }
+      },
+      "calendarWaitToLaunch": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "reported",
+          "sourceIds": [
+            "community-review-times",
+            "community-review-13days"
+          ],
+          "note": "Reported 2026 waits of roughly 2-3 weeks per review round; rejections restart the clock."
+        }
+      },
+      "recommendation": "The long pole. Ship a share-sheet fallback (no OAuth) for posting while review is pending.",
+      "composioToolkit": "INSTAGRAM",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-content-publishing",
+          "meta-overview"
+        ],
+        "note": "Instagram Login publishing needs \"instagram_business_basic, instagram_business_content_publish\"."
+      }
+    }
+  ],
+  "prerequisites": [
+    {
+      "id": "pro-account",
+      "kind": "end_user_account",
+      "description": "Each end user needs an Instagram Business or Creator (professional) account; personal accounts can't connect.",
+      "whoNeedsIt": "end_user",
+      "blocking": true,
+      "accessLevelIds": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "composio-instagram",
+          "meta-overview",
+          "shot-connected-account"
+        ],
+        "note": "\"Only supports Instagram Business and Creator accounts, not Instagram Personal accounts.\" Also shown in the Composio dashboard during our test."
+      }
+    },
+    {
+      "id": "business-entity",
+      "kind": "legal_entity",
+      "description": "A business that can pass Meta Business Verification, attached to the app.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-overview"
+        ],
+        "note": "\"You must complete Business Verification if your app requires Advanced Access\""
+      }
+    },
+    {
+      "id": "privacy-policy",
+      "kind": "privacy_policy_url",
+      "description": "A public privacy policy URL in the app settings.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review"
+        ],
+        "note": "App settings require a \"Privacy Policy URL\"."
+      }
+    },
+    {
+      "id": "public-media",
+      "kind": "other",
+      "description": "Images to publish must be JPEGs on a publicly reachable URL at publish time.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": [
+        "publish"
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-content-publishing"
+        ],
+        "note": "\"the media must be hosted on a publicly accessible server at the time of the attempt\" and \"JPEG is the only image format supported.\""
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "create-app",
+      "title": "Create a Meta app and add Instagram",
+      "detail": "In the Meta App Dashboard, create an app and add the Instagram product, choosing API setup with Instagram login.",
+      "actor": "developer",
+      "url": "https://developers.facebook.com/apps",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-business-login"
+        ],
+        "note": "Path: App Dashboard > Instagram > API setup with Instagram login."
+      }
+    },
+    {
+      "id": "redirect-uri",
+      "title": "Set Composio's callback as the OAuth redirect URI",
+      "detail": "Under Business login settings, add the redirect URI from your Composio INSTAGRAM auth config, character for character.",
+      "actor": "developer",
+      "url": "https://developers.facebook.com/apps",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-business-login"
+        ],
+        "note": "\"Make sure this exactly matches one of the base URIs in your list of valid OAuth URIs\"; the Dashboard may add a trailing slash."
+      }
+    },
+    {
+      "id": "policy-pages",
+      "title": "Publish privacy policy and data-deletion pages",
+      "detail": "Draft the privacy policy (naming Meta data, Composio and AI processing) and a data-deletion page or callback, then add their URLs in app settings.",
+      "actor": "agent_prepares",
+      "url": "https://developers.facebook.com/documentation/development/create-an-app/app-dashboard/basic-settings",
+      "accessLevelIds": [],
+      "gateId": "policy-urls",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review",
+          "meta-basic-settings"
+        ],
+        "note": "Data deletion: Meta's basic settings mention both a callback and an instructions URL; which one Instagram review accepts is open."
+      }
+    },
+    {
+      "id": "composio-auth-config",
+      "title": "Create the Composio auth config with your app's credentials",
+      "detail": "Create an INSTAGRAM auth config that uses your own Meta app (app ID and secret) and pass it to your sessions.",
+      "actor": "agent_prepares",
+      "url": "https://platform.composio.dev",
+      "accessLevelIds": [],
+      "gateId": null,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "composio-instagram"
+        ],
+        "note": "\"an owned Meta app is the current unblock path for production usage.\""
+      }
+    },
+    {
+      "id": "standard-access-test",
+      "title": "Test with your own accounts under Standard Access",
+      "detail": "Add your team's professional accounts to the app and connect them. Check which permissions each user actually granted: users can switch off everything except basic profile on the consent screen.",
+      "actor": "developer",
+      "url": null,
+      "accessLevelIds": [],
+      "gateId": null,
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "test-managed-connect",
+          "meta-business-login"
+        ],
+        "note": "Permission toggles observed on Instagram's consent screen during our managed-app test (2026-10-28)."
+      }
+    },
+    {
+      "id": "api-calls",
+      "title": "Make a successful API call for each permission",
+      "detail": "Meta requires at least one successful call per permission before you can request Advanced Access; a coding agent can write and run these.",
+      "actor": "agent",
+      "url": null,
+      "accessLevelIds": [],
+      "gateId": "app-review",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review"
+        ],
+        "note": "\"To request Advanced Access to certain permissions, you need to make at least 1 successful API call\""
+      }
+    },
+    {
+      "id": "verify-business",
+      "title": "Complete Business Verification",
+      "detail": "Verify your business in Meta Business settings and connect it to the app. Start this first; it gates everything else.",
+      "actor": "developer",
+      "url": "https://business.facebook.com/settings",
+      "accessLevelIds": [],
+      "gateId": "business-verification",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-overview"
+        ],
+        "note": "\"You must complete Business Verification if your app requires Advanced Access\""
+      }
+    },
+    {
+      "id": "review-pack",
+      "title": "Prepare screencasts and test instructions",
+      "detail": "Write a step-by-step use case and test login per permission; the agent scripts each screencast, you record it showing the end-to-end flow with the login button visible.",
+      "actor": "agent_prepares",
+      "url": null,
+      "accessLevelIds": [],
+      "gateId": "app-review",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review"
+        ],
+        "note": "\"Upload a screencast showing the end-to-end user experience for that specific permission or feature.\""
+      }
+    },
+    {
+      "id": "submit-review",
+      "title": "Submit App Review for Advanced Access",
+      "detail": "Submit each permission with its use case, screencast and test instructions; reviewers must be able to load and test the app externally.",
+      "actor": "developer",
+      "url": "https://developers.facebook.com/apps",
+      "accessLevelIds": [],
+      "gateId": "app-review",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review"
+        ],
+        "note": "\"Your app must complete App Review before it can request permissions with Advanced Access from any app user\""
+      }
+    }
+  ],
+  "gates": [
+    {
+      "id": "register-app",
+      "kind": "registration",
+      "name": "Meta app with Instagram login",
+      "phase": "development",
+      "threshold": null,
+      "description": "Create the Meta app, add Instagram with Instagram login, and set the redirect URI.",
+      "startUrl": "https://developers.facebook.com/apps",
+      "typicalWait": null,
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-business-login"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "policy-urls",
+      "kind": "policy_urls",
+      "name": "Privacy policy and data deletion",
+      "phase": "launch",
+      "threshold": null,
+      "description": "A privacy policy URL and a data-deletion path are required in the app settings.",
+      "startUrl": "https://developers.facebook.com/documentation/development/create-an-app/app-dashboard/basic-settings",
+      "typicalWait": null,
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review",
+          "meta-basic-settings"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "app-review",
+      "kind": "use_case_review",
+      "name": "App Review (Advanced Access)",
+      "phase": "launch",
+      "threshold": null,
+      "description": "Meta reviews each permission's use case, screencast and test access before your app can serve accounts you don't own or manage.",
+      "startUrl": "https://developers.facebook.com/apps",
+      "typicalWait": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "reported",
+          "sourceIds": [
+            "community-review-times",
+            "community-review-13days"
+          ],
+          "note": "No official figure found. Reports range from days (2025) to 17-19 days (May 2026)."
+        }
+      },
+      "cost": null,
+      "reviewerChecks": [
+        {
+          "text": "The app can be loaded and tested externally, with test login instructions.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "meta-app-review"
+            ],
+            "note": "\"Confirm that your app can be loaded and tested externally\""
+          }
+        },
+        {
+          "text": "A screencast per permission showing the end-to-end user experience.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "meta-app-review"
+            ],
+            "note": "\"Upload a screencast showing the end-to-end user experience for that specific permission or feature.\""
+          }
+        },
+        {
+          "text": "At least one successful API call per permission.",
+          "evidence": {
+            "label": "documented",
+            "sourceIds": [
+              "meta-app-review"
+            ],
+            "note": "\"you need to make at least 1 successful API call\""
+          }
+        }
+      ],
+      "rejectionReasons": [
+        {
+          "reason": "Reviewers couldn't log in or reproduce the flow.",
+          "fix": "Give working test credentials and step-by-step instructions that match the screencast.",
+          "evidence": {
+            "label": "unverified",
+            "sourceIds": [
+              "meta-app-review"
+            ],
+            "note": "Inferred from what Meta requires; no rejection statistics found."
+          }
+        }
+      ],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-app-review",
+          "meta-overview"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "business-verification",
+      "kind": "business_verification",
+      "name": "Business Verification",
+      "phase": "launch",
+      "threshold": null,
+      "description": "Meta verifies the legal business behind the app; required for Advanced Access and for any user without a role on the app.",
+      "startUrl": "https://business.facebook.com/settings",
+      "typicalWait": {
+        "min": null,
+        "max": null,
+        "unit": "weeks",
+        "evidence": {
+          "label": "reported",
+          "sourceIds": [
+            "community-bv-stuck"
+          ],
+          "note": "Forum report of verification \"in review\" for 10+ days, blocking App Review submission (2026)."
+        }
+      },
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-overview"
+        ],
+        "note": "\"You must complete Business Verification if your app requires Advanced Access\""
+      }
+    }
+  ],
+  "fallbackWhilePending": [
+    {
+      "text": "Use Composio's managed Instagram app: it connected a real account end to end in our test, but users see \"Composio-IG\" on Instagram's consent screen.",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "test-managed-connect",
+          "shot-connect-link",
+          "shot-connected-account"
+        ],
+        "note": "Tested 2026-10-28 with a real account."
+      }
+    },
+    {
+      "text": "Serve your own and your team's accounts under Standard Access, which needs no review.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "meta-overview"
+        ],
+        "note": "\"If your app only serves your Instagram professional account or an account you manage, Standard Access is all the your app needs.\""
+      }
+    },
+    {
+      "text": "For posting, render the image and hand it to the phone's share sheet; no OAuth or review needed.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [],
+        "note": "Product suggestion, not a provider fact."
+      }
+    }
+  ],
+  "composio": {
+    "toolkits": [
+      {
+        "slug": "INSTAGRAM",
+        "accessLevelIds": [],
+        "managedAuthAvailable": true,
+        "authScheme": "OAUTH2",
+        "customCredentials": [
+          "Meta app ID",
+          "Meta app secret"
+        ],
+        "whyGoCustom": [
+          {
+            "text": "Branding: the managed app shows \"Composio-IG\" on Instagram's own consent screen, after Composio's connect page.",
+            "evidence": {
+              "label": "tested",
+              "sourceIds": [
+                "test-managed-connect",
+                "shot-connect-link"
+              ],
+              "note": "Observed 2026-10-28; consent screenshot (04) still to be added."
+            }
+          },
+          {
+            "text": "Some permissions (e.g. replying to comments) aren't approved on the managed app; Composio says an owned Meta app is the production path.",
+            "evidence": {
+              "label": "documented",
+              "sourceIds": [
+                "composio-instagram"
+              ],
+              "note": "\"an owned Meta app is the current unblock path for production usage.\""
+            }
+          }
+        ],
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "test-managed-connect",
+            "shot-connected-account",
+            "composio-instagram"
+          ],
+          "note": "Managed connection reached \"In use\" in the Composio dashboard."
+        }
+      }
+    ],
+    "redirectUri": {
+      "text": "Copy the exact callback from your Composio INSTAGRAM auth config.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [],
+        "note": "Composio's Instagram page doesn't state the OAuth callback; read it off the auth config screen in the portal run."
+      }
+    },
+    "notes": [
+      {
+        "text": "The managed app requested publish, messages, comments and insights permissions from our non-tester account, each of which the user can switch off; so check granted permissions before posting.",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "test-managed-connect"
+          ],
+          "note": null
+        }
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "meta-overview",
+      "kind": "provider_doc",
+      "title": "Meta: Instagram Platform overview",
+      "location": "https://developers.facebook.com/documentation/instagram-platform/overview",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "meta-app-review",
+      "kind": "provider_doc",
+      "title": "Meta: Instagram Platform App Review",
+      "location": "https://developers.facebook.com/documentation/instagram-platform/app-review",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "meta-business-login",
+      "kind": "provider_doc",
+      "title": "Meta: Business Login for Instagram",
+      "location": "https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login/business-login",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "meta-content-publishing",
+      "kind": "provider_doc",
+      "title": "Meta: Instagram content publishing",
+      "location": "https://developers.facebook.com/documentation/instagram-platform/content-publishing",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "meta-basic-settings",
+      "kind": "provider_doc",
+      "title": "Meta: App Dashboard basic settings",
+      "location": "https://developers.facebook.com/documentation/development/create-an-app/app-dashboard/basic-settings",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "composio-instagram",
+      "kind": "composio_doc",
+      "title": "Composio: Instagram toolkit",
+      "location": "https://docs.composio.dev/toolkits/instagram",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "test-managed-connect",
+      "kind": "test_log",
+      "title": "Test log: connecting Instagram through Composio's managed app",
+      "location": "evidence/instagram/2026-10-28-managed-connect.md",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "shot-connect-link",
+      "kind": "screenshot",
+      "title": "Composio Connect Link: \"Composio wants to connect to your Instagram\"",
+      "location": "evidence/instagram/2026-10-28-01-composio-connect-link.png",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "shot-connected-account",
+      "kind": "screenshot",
+      "title": "Composio dashboard: connected account \"In use\"",
+      "location": "evidence/instagram/2026-10-28-05-composio-connected-account.png",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "community-review-times",
+      "kind": "community",
+      "title": "bundle.social: Meta App Review now takes ~20 days (July 2026)",
+      "location": "https://bundle.social/blog/meta-app-review-20-days",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "community-review-13days",
+      "kind": "community",
+      "title": "Meta developer community: App Review stuck at 13 days (Instagram permissions)",
+      "location": "https://developers.facebook.com/community/threads/3459359287566790/",
+      "accessedOn": "2026-10-28"
+    },
+    {
+      "id": "community-bv-stuck",
+      "kind": "community",
+      "title": "Meta community forum: Business Verification in review 10+ days, blocking App Review",
+      "location": "https://communityforums.atmeta.com/discussions/Questions_Discussions/business-verification-in-review-10-days-%E2%80%94-blocking-app-review-submission/1372323",
+      "accessedOn": "2026-10-28"
+    }
+  ],
+  "openQuestions": [
+    {
+      "question": "Does a data-deletion instructions URL pass Instagram review, or is a deletion callback endpoint required?",
+      "whyItMatters": "A callback is real engineering work in your backend; an instructions page is an hour.",
+      "howToResolve": "test"
+    },
+    {
+      "question": "Which permissions has Composio's managed Instagram app been approved for, given it requested publish and messaging from a non-tester account?",
+      "whyItMatters": "Decides how long you can stay on managed auth before going custom.",
+      "howToResolve": "ask_composio"
+    },
+    {
+      "question": "How long do App Review and Business Verification take right now?",
+      "whyItMatters": "No official figure; 2026 reports vary from days to weeks.",
+      "howToResolve": "community"
+    }
+  ]
+}

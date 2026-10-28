@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
+# Secrets: never commit. Copy .env.example to .env.local and fill it in.
+.env
+.env*.local
+# Local dev store for generated guides (lib/store.ts)
+.data/
+# Private working notes and local tooling, not part of the submission
+CLAUDE.md
+.claude/
+private/

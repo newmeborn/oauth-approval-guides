@@ -1,0 +1,291 @@
+{
+  "schemaVersion": "1.0.0",
+  "app": {
+    "name": "Google Calendar",
+    "slug": "google-calendar",
+    "website": "https://calendar.google.com",
+    "developerPortalUrl": "https://console.cloud.google.com/auth/overview"
+  },
+  "provenance": {
+    "generatedBy": "agent",
+    "lastChecked": "2026-10-28",
+    "summary": "Sign-in alone is self-serve, but reading or writing calendar events uses sensitive scopes, so real users need Google's verification: a verified domain, a privacy policy, a demo video, and a review Google says typically takes 3-5 business days, though some developers report weeks. Start verification early and launch to up to 100 test users meanwhile, knowing their tokens expire every 7 days."
+  },
+  "accessLevels": [
+    {
+      "id": "sign-in",
+      "kind": "sign_in",
+      "name": "Sign the user in with Google",
+      "mechanism": "OAuth with basic profile scopes only; no Calendar access.",
+      "scopes": ["openid", "email", "profile"],
+      "gateIds": ["register-app"],
+      "activeEffort": { "min": 30, "max": 60, "unit": "minutes", "evidence": { "label": "unverified", "sourceIds": [], "note": "Agent estimate: project, consent screen, OAuth client, Composio auth config." } },
+      "calendarWaitToLaunch": { "min": 0, "max": 0, "unit": "minutes", "evidence": { "label": "documented", "sourceIds": ["google-verification-help"], "note": "\"If your app utilizes only non-sensitive scopes, it is not mandatory for your app to complete the app verification process.\"" } },
+      "recommendation": "Self-serve. Basic profile scopes also keep long-lived refresh tokens while in Testing.",
+      "composioToolkit": null,
+      "evidence": { "label": "documented", "sourceIds": ["google-oauth2", "google-verification-help"], "note": "Testing-mode tokens don't expire after 7 days when \"the only OAuth scopes requested are a subset of name, email address, and user profile.\"" }
+    },
+    {
+      "id": "read-events",
+      "kind": "read",
+      "name": "Read the user's calendar events",
+      "mechanism": "User OAuth token with a read-only Calendar scope.",
+      "scopes": ["calendar.events.readonly", "calendar.events.owned.readonly", "calendar.readonly"],
+      "gateIds": ["register-app", "domain-verification", "brand-verification", "sensitive-scope-review"],
+      "activeEffort": { "min": 4, "max": 8, "unit": "hours", "evidence": { "label": "unverified", "sourceIds": [], "note": "Agent estimate: verified domain, privacy policy, scope justification and demo video, on top of setup." } },
+      "calendarWaitToLaunch": { "min": 3, "max": null, "unit": "days", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification", "community-stuck"], "note": "\"The sensitive scope verification process typically takes 3-5 business days to complete.\" Open-ended because developers report reviews stalled for 8+ weeks." } },
+      "recommendation": "Submit for verification as soon as the domain and privacy policy are live; launch to test users meanwhile.",
+      "composioToolkit": "GOOGLECALENDAR",
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Examples of sensitive scopes include reading events stored in Google Calendar\"" }
+    },
+    {
+      "id": "write-events",
+      "kind": "write",
+      "name": "Create and update events (e.g. fixtures)",
+      "mechanism": "User OAuth token with a Calendar write scope. The narrowest options touch only calendars the user owns or the app created.",
+      "scopes": ["calendar.events.owned", "calendar.app.created", "calendar.events"],
+      "gateIds": ["register-app", "domain-verification", "brand-verification", "sensitive-scope-review"],
+      "activeEffort": { "min": 4, "max": 8, "unit": "hours", "evidence": { "label": "unverified", "sourceIds": [], "note": "Agent estimate, same work as reading plus the write flow in the demo video." } },
+      "calendarWaitToLaunch": { "min": 3, "max": null, "unit": "days", "evidence": { "label": "unverified", "sourceIds": [], "note": "Assumes write scopes are sensitive like read scopes. If Google classes the chosen scope as restricted, a paid security assessment adds weeks. Check the classification in the Console." } },
+      "recommendation": "Prefer calendar.app.created or calendar.events.owned over full calendar access, and read their classification in the Console before you build.",
+      "composioToolkit": "GOOGLECALENDAR",
+      "evidence": { "label": "documented", "sourceIds": ["google-calendar-scopes"], "note": "calendar.app.created: \"Make secondary Google calendars, and see, create, change, and delete events on them.\" Google's scope page doesn't state sensitivity." }
+    }
+  ],
+  "prerequisites": [
+    {
+      "id": "google-account",
+      "kind": "developer_account",
+      "description": "A Google account and a Google Cloud project with the Calendar API enabled.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": [],
+      "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": "Composio: the Calendar API must be enabled in the Google Cloud project that owns your credentials." }
+    },
+    {
+      "id": "verified-domain",
+      "kind": "verified_domain",
+      "description": "A domain you own, verified in Google Search Console, that hosts your public home page.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": ["read-events", "write-events"],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Verify ownership of your project's authorized domains within the Google Search Console\"" }
+    },
+    {
+      "id": "privacy-policy",
+      "kind": "privacy_policy_url",
+      "description": "A public privacy policy on the same domain as the home page, describing how you use Google user data.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": ["read-events", "write-events"],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"The privacy policy must be visible to users, hosted within the same domain as your application's home page\"" }
+    },
+    {
+      "id": "demo-video",
+      "kind": "other",
+      "description": "A video showing how a user grants each requested scope and how the app uses the data.",
+      "whoNeedsIt": "developer",
+      "blocking": true,
+      "accessLevelIds": ["read-events", "write-events"],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Prepare a video that fully demonstrates how a user initiates and grants access to the requested scopes\"" }
+    }
+  ],
+  "steps": [
+    {
+      "id": "create-project",
+      "title": "Create a Cloud project and enable the Calendar API",
+      "detail": "In the Google Cloud Console, create or pick a project, then enable the Google Calendar API in the API Library.",
+      "actor": "developer",
+      "url": "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": { "label": "documented", "sourceIds": ["composio-googleapps"], "note": "Composio's guide walks through the same steps for the Gmail API." }
+    },
+    {
+      "id": "consent-screen",
+      "title": "Set up the Google Auth Platform (consent screen)",
+      "detail": "Enter app name, support email, audience (External for public apps) and developer contact. This name and logo are what users see instead of Composio's.",
+      "actor": "developer",
+      "url": "https://console.cloud.google.com/auth/overview",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": { "label": "documented", "sourceIds": ["composio-googleapps"], "note": "Wizard steps quoted from Composio's guide: App Information, Audience, Contact Information, Acknowledgement." }
+    },
+    {
+      "id": "oauth-client",
+      "title": "Create the OAuth client with Composio's redirect URI",
+      "detail": "Create a Web application client and add Composio's callback as an authorized redirect URI. Copy the client ID and create a client secret.",
+      "actor": "developer",
+      "url": "https://console.cloud.google.com/auth/clients",
+      "accessLevelIds": [],
+      "gateId": "register-app",
+      "evidence": { "label": "documented", "sourceIds": ["composio-googleapps"], "note": "Composio's guide gives https://backend.composio.dev/api/v1/auth-apps/add; newer Composio docs show v3 callback paths, so copy the one your auth config screen shows." }
+    },
+    {
+      "id": "choose-scopes",
+      "title": "Choose the narrowest Calendar scopes",
+      "detail": "Map each agent feature to the narrowest scope (e.g. calendar.app.created for fixtures) and add them under Data Access, where the Console shows which are sensitive or restricted.",
+      "actor": "agent_prepares",
+      "url": "https://developers.google.com/workspace/calendar/api/auth",
+      "accessLevelIds": ["read-events", "write-events"],
+      "gateId": null,
+      "evidence": { "label": "unverified", "sourceIds": ["google-calendar-scopes"], "note": "That the Console labels scope sensitivity is expected but not yet seen; to confirm in the hands-on run." }
+    },
+    {
+      "id": "composio-auth-config",
+      "title": "Create the Composio auth config with your credentials",
+      "detail": "In Composio, create a GOOGLECALENDAR auth config that uses your own OAuth app, paste the client ID and secret, and pass the auth config to your sessions.",
+      "actor": "agent_prepares",
+      "url": "https://platform.composio.dev",
+      "accessLevelIds": [],
+      "gateId": null,
+      "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": "\"To show your own app name and logo, create your own OAuth app and set a custom redirect URL.\"" }
+    },
+    {
+      "id": "test-users",
+      "title": "Add test users and test end to end",
+      "detail": "Keep the app in Testing, add yourself and early users (up to 100), and connect through Composio. Expect sensitive-scope refresh tokens to expire after 7 days.",
+      "actor": "developer",
+      "url": "https://console.cloud.google.com/auth/audience",
+      "accessLevelIds": [],
+      "gateId": null,
+      "evidence": { "label": "documented", "sourceIds": ["google-audience", "google-oauth2"], "note": "Testing projects are \"limited to up to 100 test users\" (seen via search excerpt); Testing status \"is issued a refresh token expiring in 7 days\"." }
+    },
+    {
+      "id": "verification-pack",
+      "title": "Prepare the verification pack",
+      "detail": "Home page and privacy policy on your domain, a justification per sensitive scope, and a demo video script showing consent and use.",
+      "actor": "agent_prepares",
+      "url": null,
+      "accessLevelIds": ["read-events", "write-events"],
+      "gateId": "sensitive-scope-review",
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Prepare a detailed justification for each requested sensitive scope\"" }
+    },
+    {
+      "id": "verify-domain",
+      "title": "Verify your domain in Search Console",
+      "detail": "Prove you own the domain listed as an authorized domain.",
+      "actor": "developer",
+      "url": "https://search.google.com/search-console",
+      "accessLevelIds": ["read-events", "write-events"],
+      "gateId": "domain-verification",
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Verify ownership of your project's authorized domains within the Google Search Console\"" }
+    },
+    {
+      "id": "submit-verification",
+      "title": "Publish the app and submit for verification",
+      "detail": "Move the app to In production and submit; record the demo video yourself. Until approved, users see the unverified-app screen and you are capped at 100 new users.",
+      "actor": "developer",
+      "url": "https://console.cloud.google.com/auth/verification",
+      "accessLevelIds": ["read-events", "write-events"],
+      "gateId": "sensitive-scope-review",
+      "evidence": { "label": "documented", "sourceIds": ["google-unverified-apps"], "note": "\"your app will be limited to 100 new users until it is verified.\"" }
+    }
+  ],
+  "gates": [
+    {
+      "id": "register-app",
+      "kind": "registration",
+      "name": "Cloud project and OAuth client",
+      "phase": "development",
+      "threshold": null,
+      "description": "Create the project, consent screen and OAuth client to get a client ID and secret.",
+      "startUrl": "https://console.cloud.google.com/auth/overview",
+      "typicalWait": null,
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": { "label": "documented", "sourceIds": ["composio-googleapps"], "note": null }
+    },
+    {
+      "id": "domain-verification",
+      "kind": "domain_verification",
+      "name": "Domain ownership",
+      "phase": "launch",
+      "threshold": null,
+      "description": "Every authorized domain (home page, privacy policy, redirect domains you own) must be verified in Search Console.",
+      "startUrl": "https://search.google.com/search-console",
+      "typicalWait": null,
+      "cost": null,
+      "reviewerChecks": [],
+      "rejectionReasons": [],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": null }
+    },
+    {
+      "id": "brand-verification",
+      "kind": "brand_verification",
+      "name": "Brand verification",
+      "phase": "launch",
+      "threshold": null,
+      "description": "Google checks the app name, logo, home page and privacy policy shown on the consent screen.",
+      "startUrl": "https://console.cloud.google.com/auth/branding",
+      "typicalWait": { "min": null, "max": null, "unit": "days", "evidence": { "label": "unverified", "sourceIds": [], "note": "No official figure found for brand verification on its own." } },
+      "cost": null,
+      "reviewerChecks": [
+        { "text": "Home page is public and not behind a login.", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Your home page must be publicly accessible, and not just accessible to your site's logged-in users.\"" } }
+      ],
+      "rejectionReasons": [],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification", "google-verification-help"], "note": "\"All apps that use Google APIs to request access to data must perform the following steps to complete brand verification\"" }
+    },
+    {
+      "id": "sensitive-scope-review",
+      "kind": "use_case_review",
+      "name": "Sensitive scope verification",
+      "phase": "launch",
+      "threshold": null,
+      "description": "Google reviews why you need each sensitive scope and how the app uses it before any Google account outside your test users can grant it.",
+      "startUrl": "https://console.cloud.google.com/auth/verification",
+      "typicalWait": { "min": 3, "max": 5, "unit": "days", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"The sensitive scope verification process typically takes 3-5 business days to complete.\" Business days." } },
+      "cost": null,
+      "reviewerChecks": [
+        { "text": "A justification for each sensitive scope.", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Prepare a detailed justification for each requested sensitive scope\"" } },
+        { "text": "A demo video of a user granting the scopes and the app using them.", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"Prepare a video that fully demonstrates how a user initiates and grants access to the requested scopes\"" } },
+        { "text": "A privacy policy on the same domain as the home page.", "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification"], "note": "\"The privacy policy must be visible to users, hosted within the same domain as your application's home page\"" } }
+      ],
+      "rejectionReasons": [
+        { "reason": "Review stalls with no response.", "fix": "Reply on the verification email thread and keep scopes minimal; plan launch with test users meanwhile.", "evidence": { "label": "reported", "sourceIds": ["community-stuck"], "note": "Forum report of a sensitive-scope review under review for 8+ weeks (2026)." } }
+      ],
+      "evidence": { "label": "documented", "sourceIds": ["google-sensitive-verification", "google-verification-help"], "note": "\"Sensitive scopes require review by Google before any Google Account can grant access.\"" }
+    }
+  ],
+  "fallbackWhilePending": [
+    { "text": "Stay in Testing and add up to 100 test users; their sensitive-scope tokens expire after 7 days, so they reconnect weekly.", "evidence": { "label": "documented", "sourceIds": ["google-audience", "google-oauth2"], "note": "Test user limit seen via search excerpt." } },
+    { "text": "Keep using Composio's managed Google Calendar app until your own app is verified; users see Composio's name on the consent screen.", "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": "The toolkit page lists Composio-managed OAuth as available." } },
+    { "text": "Launch sign-in first: basic profile scopes need no verification.", "evidence": { "label": "documented", "sourceIds": ["google-verification-help"], "note": null } }
+  ],
+  "composio": {
+    "toolkits": [
+      {
+        "slug": "GOOGLECALENDAR",
+        "accessLevelIds": ["read-events", "write-events"],
+        "managedAuthAvailable": true,
+        "authScheme": "OAUTH2",
+        "customCredentials": ["client ID", "client secret"],
+        "whyGoCustom": [
+          { "text": "Your own name and logo on Google's consent screen instead of Composio's.", "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": "\"To show your own app name and logo, create your own OAuth app and set a custom redirect URL.\"" } },
+          { "text": "Scopes beyond what Composio's app is verified for: unverified extra scopes get the app blocked.", "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": "\"The OAuth client is requesting scopes that Google hasn't verified for that client.\"" } }
+        ],
+        "evidence": { "label": "documented", "sourceIds": ["composio-googlecalendar"], "note": null }
+      }
+    ],
+    "redirectUri": { "text": "https://backend.composio.dev/api/v1/auth-apps/add", "evidence": { "label": "documented", "sourceIds": ["composio-googleapps"], "note": "From Composio's Google guide; newer docs show v3 callback paths. Copy the exact URI from your auth config screen." } },
+    "notes": []
+  },
+  "sources": [
+    { "id": "google-oauth2", "kind": "provider_doc", "title": "Google Identity: Using OAuth 2.0 to access Google APIs", "location": "https://developers.google.com/identity/protocols/oauth2", "accessedOn": "2026-10-28" },
+    { "id": "google-calendar-scopes", "kind": "provider_doc", "title": "Google Calendar API: Choose scopes", "location": "https://developers.google.com/workspace/calendar/api/auth", "accessedOn": "2026-10-28" },
+    { "id": "google-sensitive-verification", "kind": "provider_doc", "title": "Google Identity: Sensitive scope verification", "location": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification", "accessedOn": "2026-10-28" },
+    { "id": "google-verification-help", "kind": "provider_doc", "title": "Google Cloud Help: OAuth app verification", "location": "https://support.google.com/cloud/answer/13463073", "accessedOn": "2026-10-28" },
+    { "id": "google-unverified-apps", "kind": "provider_doc", "title": "Google Cloud Help: Unverified apps", "location": "https://support.google.com/cloud/answer/7454865", "accessedOn": "2026-10-28" },
+    { "id": "google-audience", "kind": "provider_doc", "title": "Google Cloud Help: Manage App Audience", "location": "https://support.google.com/cloud/answer/15549945", "accessedOn": "2026-10-28" },
+    { "id": "composio-googlecalendar", "kind": "composio_doc", "title": "Composio: Google Calendar toolkit", "location": "https://docs.composio.dev/toolkits/googlecalendar", "accessedOn": "2026-10-28" },
+    { "id": "composio-googleapps", "kind": "composio_doc", "title": "Composio: Create a Google OAuth app", "location": "https://composio.dev/auth/googleapps", "accessedOn": "2026-10-28" },
+    { "id": "community-stuck", "kind": "community", "title": "Google Developer forum: sensitive-scope verification under review for 8 weeks", "location": "https://discuss.google.dev/t/oauth-data-access-verification-stuck-under-review-for-8-weeks-sensitive-scope-only-spreadsheets-no-trust-safety-contact/375352", "accessedOn": "2026-10-28" },
+    { "id": "nylas-calendar", "kind": "community", "title": "Nylas: How to use OAuth for Google Calendar", "location": "https://developer.nylas.com/docs/cookbook/calendar/google-calendar-oauth/", "accessedOn": "2026-10-28" }
+  ],
+  "openQuestions": [
+    { "question": "Which Calendar write scopes does Google class as sensitive vs restricted? One vendor guide calls calendar.events restricted, which would add a paid security assessment.", "whyItMatters": "Restricted would move the write level from days of review to weeks plus a fee.", "howToResolve": "test" },
+    { "question": "Is calendar.app.created treated as less sensitive than calendar.events?", "whyItMatters": "If so, a fixtures-only agent could pick the cheaper path.", "howToResolve": "test" },
+    { "question": "Which redirect URI does Composio's GOOGLECALENDAR auth config show today (v1 auth-apps/add or a v3 callback)?", "whyItMatters": "A mismatch breaks the OAuth flow with redirect_uri_mismatch.", "howToResolve": "test" }
+  ]
+}
