@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Guide } from "@/lib/guide/schema";
-import { whenText } from "@/lib/guide/format";
+import { tierUnconfirmed, whenText } from "@/lib/guide/format";
 import { verdictFor } from "@/lib/guide/tiers";
 import { TierPill } from "./Pills";
 
@@ -21,7 +21,7 @@ export function GuideCard({ guide, href, tag, foot }: { guide: Guide; href: stri
             <li key={l.id}>
               <span className="card-level-name">{l.name}</span>
               <span className="card-level-tiers">
-                <TierPill tier={v.tierAtLaunch} />
+                <TierPill tier={v.tierAtLaunch} unconfirmed={tierUnconfirmed(l, v)} />
                 {v.tierAtScale !== v.tierAtLaunch && (
                   <>
                     <span className="tier-arrow" aria-hidden="true">

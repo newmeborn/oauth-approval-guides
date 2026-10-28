@@ -14,6 +14,7 @@ import {
   hostOf,
   shortLocation,
   sourceNumbers,
+  tierUnconfirmed,
   whenText,
 } from "@/lib/guide/format";
 import { GATE_TIER, verdictFor } from "@/lib/guide/tiers";
@@ -327,7 +328,7 @@ function LevelCard({
       <h3>{level.name}</h3>
       <div className="tiers">
         <span className="tier-when">At launch</span>
-        <TierPill tier={verdict.tierAtLaunch} />
+        <TierPill tier={verdict.tierAtLaunch} unconfirmed={tierUnconfirmed(level, verdict)} />
         {changesAtScale && (
           <>
             <span className="tier-arrow" aria-hidden="true">

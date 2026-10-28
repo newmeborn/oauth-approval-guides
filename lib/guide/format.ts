@@ -1,6 +1,6 @@
 /** Display wording for schema enums and estimates. Pure, safe on server and client. */
 import type { AccessLevel, Estimate, EvidenceLabel, GateKind, Guide } from "./schema";
-import type { Tier } from "./tiers";
+import { TIER_LABEL, verdictFor, type Tier, type Verdict } from "./tiers";
 
 export const EVIDENCE_TEXT: Record<EvidenceLabel, { label: string; meaning: string }> = {
   tested: { label: "Tested", meaning: "We did it ourselves; screenshot or test log attached." },
@@ -64,6 +64,32 @@ export function formatEstimate(e: Estimate): string {
 export function whenText(thresholds: (string | null)[]): string {
   const parts = thresholds.filter((t): t is string => !!t).map((t) => (/^(at|if|when|once|above|over|past|after|beyond|only)\b/i.test(t) ? t : `at ${t}`));
   return parts.length ? parts.join(", ") : "at scale";
+}
+
+/**
+ * A "Self-serve" badge claims no one reviews you. When the guide couldn't confirm that (its
+ * "no wait" claim is unverified), the badge must say so rather than look certain.
+ */
+export function tierUnconfirmed(level: AccessLevel, verdict: Verdict): boolean {
+  return verdict.tierAtLaunch === "self_serve" && level.calendarWaitToLaunch.evidence.label === "unverified";
+}
+
+/**
+ * The verdict as one sentence, written from the computed tiers, so a guide's summary can never
+ * contradict its own badges. Generated guides put this in front of the writer's key point.
+ */
+export function verdictSentence(guide: Guide): string {
+  const tails = guide.accessLevels.map((level) => {
+    const v = verdictFor(guide, level);
+    const why = v.bindingGates.filter((g) => g.kind !== "registration").map((g) => g.name);
+    let tail = `${TIER_LABEL[v.tierAtLaunch]}${tierUnconfirmed(level, v) ? " (unconfirmed: no page about app review was read)" : ""} at launch`;
+    if (why.length) tail += ` (${why.join(", ")})`;
+    if (v.tierAtScale !== v.tierAtLaunch) tail += `, ${TIER_LABEL[v.tierAtScale]} ${whenText(v.scaleGates.map((g) => g.threshold))}`;
+    return { name: level.name, tail };
+  });
+  if (!tails.length) return "";
+  if (tails.every((t) => t.tail === tails[0].tail)) return `${tails.length > 1 ? "Every access level" : tails[0].name}: ${tails[0].tail}.`;
+  return tails.map((t) => `${t.name}: ${t.tail}`).join(". ") + ".";
 }
 
 export function sourceNumbers(guide: Guide): Map<string, number> {

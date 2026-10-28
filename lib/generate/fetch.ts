@@ -33,11 +33,30 @@ export function isPublicHttpUrl(raw: string): boolean {
   return h.includes(".");
 }
 
-export async function fetchPage(url: string, retried = false): Promise<FetchResult> {
+/**
+ * Ask for English explicitly. Without it, Google's docs answered in Korean and Hindi depending
+ * on where the request came from, and links carrying ?hl=pt-br pinned other languages.
+ */
+export function englishUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.searchParams.has("hl")) u.searchParams.set("hl", "en");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+export async function fetchPage(rawUrl: string, retried = false): Promise<FetchResult> {
+  const url = englishUrl(rawUrl);
   if (!isPublicHttpUrl(url)) return { ok: false, url, reason: "not a public web address" };
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": UA, Accept: "text/html,text/plain,text/markdown;q=0.9,*/*;q=0.5" },
+      headers: {
+        "User-Agent": UA,
+        Accept: "text/html,text/plain,text/markdown;q=0.9,*/*;q=0.5",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
       redirect: "follow",
       signal: AbortSignal.timeout(15_000),
     });

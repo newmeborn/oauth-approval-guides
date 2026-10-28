@@ -95,7 +95,7 @@ export default function ChecksPage() {
         <h2 id="limits-h">What we couldn&apos;t verify</h2>
         <ul className="claims">
           <li>Approval wait times. Providers publish typical figures (Google: 3-5 business days; Notion: 5-10) or none (Meta, Discord); developers report much longer stalls. Guides show open-ended ranges and label the source of each figure.</li>
-          <li>Anything past the first approval wall. We registered apps up to the point of submitting for review and did not wait for approvals, as the brief allows.</li>
+          <li>Developer-portal runs. I did not register apps in the Discord, Google or Meta portals; only the Instagram end-user flow was tested by hand, and no provider approvals were completed.</li>
           <li>Sites that block automated reading. Zoom&apos;s developer site reset most connections from our machine, so its generated guide says what it couldn&apos;t read instead of guessing.</li>
         </ul>
       </section>

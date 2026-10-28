@@ -2,10 +2,14 @@ import type { Actor, EvidenceLabel } from "@/lib/guide/schema";
 import { ACTOR_TEXT, EVIDENCE_TEXT, TIER_MEANING } from "@/lib/guide/format";
 import { TIER_LABEL, type Tier } from "@/lib/guide/tiers";
 
-export function TierPill({ tier, suffix }: { tier: Tier; suffix?: string }) {
+export function TierPill({ tier, suffix, unconfirmed = false }: { tier: Tier; suffix?: string; unconfirmed?: boolean }) {
+  const title = unconfirmed
+    ? `${TIER_MEANING[tier]} Unconfirmed: no page about app review could be read, so a review may still exist.`
+    : TIER_MEANING[tier];
   return (
-    <span className={`pill tier tier-${tier}`} title={TIER_MEANING[tier]}>
+    <span className={`pill tier tier-${tier}${unconfirmed ? " tier-unconfirmed" : ""}`} title={title}>
       {TIER_LABEL[tier]}
+      {unconfirmed ? <span className="pill-suffix"> · unconfirmed</span> : null}
       {suffix ? <span className="pill-suffix"> {suffix}</span> : null}
     </span>
   );

@@ -3,7 +3,7 @@ import type { Page } from "./fetch";
 
 export const PLAN_SYSTEM = `You help a research crawler find the official pages that explain how a developer gets an OAuth app ready for production with a provider: registering the app, OAuth scopes and permissions, app review / verification / publishing rules, security assessments, business verification, partner programs or paid API tiers, developer terms and rate limits.
 
-Give the exact URLs you believe exist on the provider's own domains, most useful first. Include the developer docs home, the developer portal, and the API pricing or access-tiers page if the API is paid or tiered. Docs URLs change often, so also list the docs host(s), so the crawler can read their llms.txt index and follow links. Do not include third-party sites.`;
+Give the exact URLs you believe exist on the provider's own domains, most useful first. Include the developer docs home, the developer portal, the OAuth scope reference page that lists each scope and whether it is sensitive or restricted, and the API pricing or access-tiers page if the API is paid or tiered. Docs URLs change often, so also list the docs host(s), so the crawler can read their llms.txt index and follow links. Do not include third-party sites.`;
 
 export function planInput(query: string): string {
   return `Provider: ${query}`;
@@ -27,13 +27,15 @@ Structure:
   registration (create the app), account_security (2FA etc.), policy_urls (privacy/terms URLs), domain_verification, brand_verification, identity_verification (a person's ID), use_case_review (app review or justification of permissions), security_assessment (formal audit, often paid), business_verification (legal entity documents), paid_access (paid API tier), partner_program.
   phase: development (before you can test), launch (before users outside your own account or a test list can connect), scale (only past a threshold or by choice).
   threshold, for scale gates, reads as a condition: "at 100 servers", "above 10,000 users", "if you list on the Marketplace". Optional programs (marketplace or directory listings, badges, partner tiers) are scale gates with an "if you ..." threshold, attached to the levels they apply to. Never make them access levels.
+  Restricted scopes: if a page lists a level's scope as restricted (Google uses "Restricted scopes"), that level needs a security_assessment gate (restricted-scope verification with a third-party security assessment), not just use_case_review.
+  Limits that only lift with approval: if a page says an access level is throttled, capped or blocked unless the app is approved or listed (for example, rate limits for apps not approved for a marketplace), add that approval as a use_case_review gate on that level, phase launch, and say what happens without it.
 - Estimates: activeEffort is the developer's hands-on time; calendarWaitToLaunch is waiting on approval before real users can connect (optional scale gates don't count). min and max null when no page gives a figure. Never invent numbers; 0/0 "minutes" means the pages make clear there is no review before launch. When a page says "business days", use unit days and say "business days" in the note.
 - steps: the whole path from nothing to real users connecting, in order: create the app; set the redirect URI to Composio's callback; choose scopes or capabilities; any policy URLs, branding or listing details; create the Composio auth config with the client ID and secret; test with your own account; then each submission for review, if any; then go live. actor "agent" = a coding agent can do it end to end (write code, config, policy drafts, demo scripts); "agent_prepares" = an agent drafts it and a human submits, signs or pastes it; "developer" = needs the human (logins, accepting terms, ID checks, payment, clicking submit). Split a step when part of it is agent work. accessLevelIds empty means all levels.
 - prerequisites: blocking = true if setup cannot proceed without it.
 - composio: toolkit slugs in UPPERCASE as Composio uses them (e.g. GMAIL). managedAuthAvailable null unless a Composio page says. redirectUri null unless a page gives it.
 - fallbackWhilePending: how to keep building or launch while a gate is pending (testing mode, Composio managed auth, narrower scope).
 - openQuestions: the most important things the pages did not settle.
-- summary: two sentences, the verdict and the single most important thing to know.
+- keyPoint: one sentence on the single most important thing about getting approved or staying within the provider's rules. Code writes the difficulty verdict from your gates, so don't restate it, and never call the setup easy or immediate if any gate stands before launch. No setup walkthroughs, no token details.
 - ids: short kebab-case, unique across the guide.
 
 Be concise; the guide is read on a phone. At most 3 access levels, 5 gates, 5 prerequisites, 9 steps, 3 reviewer checks and 2 rejection reasons per gate, 3 fallbacks, 4 open questions. One or two sentences per text field.`;

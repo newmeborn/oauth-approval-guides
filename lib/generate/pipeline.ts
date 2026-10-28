@@ -15,9 +15,10 @@
 import { GoogleGenAI } from "@google/genai";
 import { Guide } from "@/lib/guide/schema";
 import { checkIntegrity } from "@/lib/guide/tiers";
+import { verdictSentence } from "@/lib/guide/format";
 import { loadLibrary } from "@/lib/guide/library";
-import { Draft, Plan, assemble, checkCoverage, repair, verifyQuotes, type RetrievedSource } from "./draft";
-import { coversReview, fetchPage, isPublicHttpUrl, pool, relevantLinks, siteOf, type Page } from "./fetch";
+import { Draft, Plan, assemble, checkCoverage, checkRestrictedScopes, repair, verifyQuotes, type RetrievedSource } from "./draft";
+import { coversReview, englishUrl, fetchPage, isPublicHttpUrl, pool, relevantLinks, siteOf, type Page } from "./fetch";
 import { toGeminiSchema } from "./geminiSchema";
 import { PLAN_SYSTEM, STRUCTURE_SYSTEM, planInput, structureInput } from "./prompts";
 
@@ -39,6 +40,24 @@ const MAX_SEEDS = 21;
 const MAX_FOLLOW = 8;
 const MAX_PAGES = 12;
 const MAX_INPUT_CHARS = 120_000;
+
+/**
+ * Policy pages code always reads for known providers: they decide the tier and a planner easily
+ * misses them (Google's restricted-scope rules; Slack's 2025 rate limits for apps not approved
+ * for its Marketplace). A team would grow this registry as guides get hand-checked.
+ */
+const POLICY_PAGES: Record<string, string[]> = {
+  "google.com": [
+    "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+    "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+  ],
+  "slack.com": ["https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps"],
+  "slack.dev": ["https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps"],
+  // Product scope pages that list scopes under "Sensitive" / "Restricted" headings (read by checkRestrictedScopes).
+  gmail: ["https://developers.google.com/workspace/gmail/api/auth/scopes"],
+  "google-drive": ["https://developers.google.com/workspace/drive/api/guides/api-specific-auth"],
+  googledrive: ["https://developers.google.com/workspace/drive/api/guides/api-specific-auth"],
+};
 
 /** Try each model in turn while the failure is capacity, not a real error. */
 async function withFallback<T>(list: string[], run: (model: string) => Promise<T>): Promise<{ model: string; result: T }> {
@@ -127,8 +146,10 @@ export async function generateGuide(
   // for the provider's main domain; a 404 costs one cheap request.
   const mainSite = siteOf(p.website) || siteOf(p.developerPortalUrl);
   const conventionalIndexes = mainSite ? ["docs", "developers", "developer"].map((sub) => `https://${sub}.${mainSite}/llms.txt`) : [];
+  const policyPages = unique([...providerSites, slug, slug.split("-")[0]].flatMap((key) => POLICY_PAGES[key] ?? []));
   const seeds = unique([
     ...(fromQuery ? [asUrl(fromQuery)] : []),
+    ...policyPages,
     ...p.candidates.map((c) => c.url),
     p.developerPortalUrl,
     ...p.docsHosts.map((h) => `${asUrl(h).replace(/\/+$/, "")}/llms.txt`),
@@ -189,11 +210,13 @@ export async function generateGuide(
     await fetchAll(follow);
   }
 
-  // Provider pages first, then Composio, then anything else; within budget.
-  const rank = { provider_doc: 0, composio_doc: 1, community: 2 } as const;
+  // Registry policy pages first, then provider pages, then Composio, then anything else; within budget.
+  const rank = { provider_doc: 1, composio_doc: 2, community: 3 } as const;
+  const isPolicy = (url: string) => policyPages.some((u) => keyOf(englishUrl(u)) === keyOf(url));
+  const order = (pg: Page) => (isPolicy(pg.url) ? 0 : rank[kindOf(pg.url)]);
   const chosen: (Page & { id: string })[] = [];
   let budget = MAX_INPUT_CHARS;
-  for (const pg of [...pages.values()].sort((a, b) => rank[kindOf(a.url)] - rank[kindOf(b.url)])) {
+  for (const pg of [...pages.values()].sort((a, b) => order(a) - order(b))) {
     if (chosen.length >= MAX_PAGES || pg.text.length > budget) continue;
     budget -= pg.text.length;
     chosen.push({ ...pg, id: `s${chosen.length + 1}` });
@@ -258,11 +281,15 @@ export async function generateGuide(
     throw new Error(`The draft didn't match the guide format (${first?.path.join(".") || "JSON"}: ${first?.message}). Try again.`);
   }
   const guide = assemble(draft.data, sources, slug);
+  const providerPages = chosen.filter((pg) => kindOf(pg.url) === "provider_doc");
   const repairs = [
     ...verifyQuotes(guide, new Map(chosen.map((pg) => [pg.id, pg.text]))),
     ...checkCoverage(guide, coversReview(chosen)),
+    ...checkRestrictedScopes(guide, providerPages, sources),
     ...repair(guide),
   ];
+  // Code writes the verdict from the final gates; the model's sentence is the key point after it.
+  guide.provenance.summary = `${verdictSentence(guide)} ${guide.provenance.summary}`.trim();
   const final = Guide.parse(guide);
   const problems = checkIntegrity(final);
   emit({ t: "check", repairs, problems });

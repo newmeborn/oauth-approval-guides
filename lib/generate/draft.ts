@@ -17,7 +17,11 @@ export const DraftSource = z.strictObject({
 });
 
 export const Draft = Guide.omit({ schemaVersion: true, provenance: true, sources: true }).extend({
-  summary: z.string().describe("Two sentences: overall verdict and the single most important thing to know."),
+  keyPoint: z
+    .string()
+    .describe(
+      "One sentence: the single most important thing about getting approved or staying within the provider's rules (a requirement, a blocker, a recent policy change, or the fallback). Not the difficulty verdict (code writes that from the gates), not setup steps, not token details.",
+    ),
   sources: z.array(DraftSource).describe("Every source id you cite anywhere, with its kind."),
 });
 export type Draft = z.infer<typeof Draft>;
@@ -48,9 +52,13 @@ export interface RetrievedSource {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** Draft + what was actually fetched -> a Guide the schema accepts. The model's own source kinds are ignored. */
+/**
+ * Draft + what was actually fetched -> a Guide the schema accepts. The model's own source kinds
+ * are ignored. The summary starts as the model's key point; the pipeline puts the code-written
+ * verdict in front of it once every check has run.
+ */
 export function assemble(draft: Draft, retrieved: RetrievedSource[], slug: string): Guide {
-  const { summary, sources: listed, ...rest } = draft;
+  const { keyPoint: summary, sources: listed, ...rest } = draft;
 
   const cited = new Set<string>(listed.map((s) => s.id));
   walkEvidence(rest, (e) => e.sourceIds.forEach((id) => cited.add(id)));
@@ -75,6 +83,120 @@ export function assemble(draft: Draft, retrieved: RetrievedSource[], slug: strin
 }
 
 const DOCUMENTED = new Set(["provider_doc", "provider_console", "composio_doc", "composio_api"]);
+
+const shortScope = (s: string) =>
+  s
+    .trim()
+    .replace(/^https?:\/\/www\.googleapis\.com\/auth\//, "")
+    .replace(/^https?:\/\/(mail\.google\.com\/?)$/, "$1");
+
+/**
+ * Restricted scopes decide the tier, so code checks them instead of trusting the writer.
+ * Scope reference pages (Google's, for one) list scopes under "Sensitive" and "Restricted"
+ * headings; any level using a scope listed under a Restricted heading gets a security-review
+ * gate, quoting the provider's own requirement when that page was read.
+ */
+export function checkRestrictedScopes(
+  guide: Guide,
+  pages: { id: string; url: string; text: string }[],
+  retrieved: RetrievedSource[],
+): string[] {
+  const notes: string[] = [];
+
+  // Our readers build on Composio, so user data always passes through a third-party server.
+  // A security review conditioned on that is a launch gate for them, not a someday one.
+  for (const g of guide.gates)
+    if (g.kind === "security_assessment" && g.phase !== "launch" && /third[- ]party server|servers?\b/i.test(`${g.threshold ?? ""} ${g.description}`)) {
+      g.phase = "launch";
+      g.threshold = null;
+      notes.push(`Moved "${g.name}" to launch: agents built on Composio access user data through a third-party server, which is the condition the provider states.`);
+    }
+  const launchAssessment = guide.gates.find((g) => g.kind === "security_assessment" && g.phase === "launch");
+
+  const restrictedOn = new Map<string, string>(); // short scope -> page id
+  for (const p of pages) {
+    let inRestricted = false;
+    for (const line of p.text.split("\n")) {
+      // Only a heading that is exactly "Restricted scopes" starts the list; Drive also has
+      // "Migrate an existing app from restricted scopes", which lists the alternatives.
+      if (/^#{1,4}\s/.test(line)) inRestricted = /^#{1,4}\s*restricted scopes\s*$/i.test(line.trim());
+      if (!inRestricted) continue;
+      for (const m of line.matchAll(/googleapis\.com\/auth\/([\w.]+)|(mail\.google\.com\/)/g)) {
+        const scope = m[1] ?? m[2];
+        if (!restrictedOn.has(scope)) restrictedOn.set(scope, p.id);
+      }
+    }
+  }
+  if (!restrictedOn.size) return notes;
+
+  const hasLaunchAssessment = (levelGateIds: string[]) =>
+    levelGateIds.some((id) => {
+      const g = guide.gates.find((x) => x.id === id);
+      return g?.kind === "security_assessment" && g.phase === "launch";
+    });
+  const hits = guide.accessLevels
+    .map((level) => ({ level, scopes: level.scopes.map(shortScope).filter((s) => restrictedOn.has(s)) }))
+    .filter((h) => h.scopes.length > 0 && !hasLaunchAssessment(h.level.gateIds));
+  if (!hits.length) return notes;
+  if (launchAssessment) {
+    for (const { level } of hits) level.gateIds.push(launchAssessment.id);
+    const scopes = [...new Set(hits.flatMap((h) => h.scopes))];
+    return [...notes, `Applied "${launchAssessment.name}" to ${hits.length} access level(s) using ${scopes.join(", ")}, which the provider's scope page lists as restricted.`];
+  }
+
+  // The provider's own statement of what restricted means, if a page we read says it.
+  const RULE = /[^.\n]*must undergo an annual security assessment[^.\n]*\./i;
+  const WAIT = /[^.\n]*restricted scopes verification process can potentially take[^.\n]*\./i;
+  const rulePage = pages.find((p) => RULE.test(p.text.replace(/\s+/g, " ")));
+  const ruleQuote = rulePage?.text.replace(/\s+/g, " ").match(RULE)?.[0].trim();
+  const waitQuote = rulePage?.text.replace(/\s+/g, " ").match(WAIT)?.[0].trim();
+
+  const scopes = [...new Set(hits.flatMap((h) => h.scopes))];
+  const scopePageIds = [...new Set(scopes.map((s) => restrictedOn.get(s)!))];
+  const cite = [...scopePageIds, ...(rulePage ? [rulePage.id] : [])];
+  for (const id of cite)
+    if (!guide.sources.some((s) => s.id === id)) {
+      const src = retrieved.find((r) => r.id === id);
+      if (src) guide.sources.push({ id, kind: src.kind, title: src.title, location: src.url, accessedOn: today() });
+    }
+
+  const gate: Gate = {
+    id: "restricted-scope-assessment",
+    kind: "security_assessment",
+    name: "Restricted-scope verification and security assessment",
+    phase: "launch",
+    threshold: null,
+    description: `The provider lists ${scopes.join(", ")} as restricted. Restricted scopes need extra verification and, when data passes through a third-party server (as with an agent platform), an annual security assessment by an approved assessor.`,
+    startUrl: rulePage?.url ?? null,
+    typicalWait: {
+      min: null,
+      max: null,
+      unit: "weeks",
+      evidence: waitQuote
+        ? { label: "documented", sourceIds: [rulePage!.id], note: `"${waitQuote}"` }
+        : { label: "unverified", sourceIds: [], note: "No duration found in the pages read." },
+    },
+    cost: null,
+    reviewerChecks: [],
+    rejectionReasons: [],
+    evidence: {
+      label: "documented",
+      sourceIds: cite,
+      note: ruleQuote
+        ? `"${ruleQuote}" Code check: ${scopes.join(", ")} appear under a Restricted heading on the cited scope page.`
+        : `Code check: ${scopes.join(", ")} appear under a "Restricted scopes" heading on the cited scope page.`,
+    },
+  };
+  guide.gates.push(gate);
+  for (const { level } of hits) {
+    level.gateIds.push(gate.id);
+    level.calendarWaitToLaunch = { min: null, max: null, unit: "weeks", evidence: gate.typicalWait!.evidence };
+  }
+  return [
+    ...notes,
+    `Added a security-review gate: the provider's scope page lists ${scopes.join(", ")} as restricted, and the guide had not said so (${hits.length} access level(s)).`,
+  ];
+}
 
 /**
  * "No approval wait" is a claim about something not existing, so a quote can't prove it. If no

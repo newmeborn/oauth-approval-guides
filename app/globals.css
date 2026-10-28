@@ -136,6 +136,7 @@ section > h2 { font-size: 1.3rem; margin: 28px 0 12px; }
 .tier-light_review { color: var(--light-fg); background: var(--light-bg); }
 .tier-security_review { color: var(--sec-fg); background: var(--sec-bg); }
 .tier-gated { color: var(--gated-fg); background: var(--gated-bg); }
+.tier-unconfirmed { background: transparent; border: 1px dashed currentColor; }
 
 .ev-tested { color: var(--tested-fg); background: var(--tested-bg); }
 .ev-documented { color: var(--doc-fg); background: var(--doc-bg); }
