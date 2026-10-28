@@ -91,7 +91,7 @@ export function GenerateRun() {
   return (
     <section className="gen" aria-live="polite">
       <p className="crumb">
-        <Link href="/">Library</Link> / Generate
+        <Link href="/#library">Library</Link> / Generate
       </p>
       <h1>{query}</h1>
       <p className="provenance prov-agent">

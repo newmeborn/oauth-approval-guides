@@ -30,7 +30,7 @@ export default async function Home() {
         <GenerateBox />
       </section>
 
-      <section aria-labelledby="library-h">
+      <section id="library" aria-labelledby="library-h">
         <h2 id="library-h">Library</h2>
         <p className="sec-q">
           Researched guides, held to the evidence rules. <Link href="/checks">How we checked them</Link>.

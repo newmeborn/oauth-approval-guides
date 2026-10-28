@@ -16,7 +16,7 @@ export default function ChecksPage() {
     <article className="checks">
       <header className="guide-head">
         <p className="crumb">
-          <Link href="/">Library</Link> / Checks
+          <Link href="/#library">Library</Link> / Checks
         </p>
         <h1>How we checked the guides</h1>
         <p className="lede">

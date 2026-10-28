@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <span className="brand-sub">for agents built on Composio</span>
           <nav className="site-nav" aria-label="Site">
-            <Link href="/">Library</Link>
+            <Link href="/#library">Library</Link>
             <Link href="/checks">How we checked</Link>
           </nav>
         </header>

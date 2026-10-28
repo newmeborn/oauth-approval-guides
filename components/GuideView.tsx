@@ -54,7 +54,7 @@ export function GuideView({ guide, appendix }: { guide: Guide; appendix?: React.
       <article className="guide">
         <header className="guide-head">
           <p className="crumb">
-            <Link href="/">Library</Link> / {guide.app.name}
+            <Link href="/#library">Library</Link> / {guide.app.name}
           </p>
           <h1>{guide.app.name}</h1>
           <Provenance guide={guide} />
