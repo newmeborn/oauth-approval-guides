@@ -19,6 +19,7 @@ import {
 import { GATE_TIER, verdictFor } from "@/lib/guide/tiers";
 import { Evidence, SourceNumbers } from "./Evidence";
 import { ActorPill, TierPill } from "./Pills";
+import { ShareBar } from "./ShareBar";
 
 const PHASE_ORDER = { development: 0, launch: 1, scale: 2 } as const;
 
@@ -26,7 +27,16 @@ const PHASE_ORDER = { development: 0, launch: 1, scale: 2 } as const;
  * One guide, organised around the developer's questions. Picking an access level filters
  * prerequisites, steps, gates and toolkits to what that level actually needs.
  */
-export function GuideView({ guide, appendix }: { guide: Guide; appendix?: React.ReactNode }) {
+export function GuideView({
+  guide,
+  share,
+  appendix,
+}: {
+  guide: Guide;
+  /** The guide's permanent path, e.g. /guides/instagram or /g/<id>, shown with a Copy button. */
+  share: { path: string; note?: string };
+  appendix?: React.ReactNode;
+}) {
   const [focusId, setFocusId] = useState<string | null>(null);
   const numbers = useMemo(() => sourceNumbers(guide), [guide]);
   const verdicts = useMemo(() => new Map(guide.accessLevels.map((l) => [l.id, verdictFor(guide, l)])), [guide]);
@@ -67,6 +77,7 @@ export function GuideView({ guide, appendix }: { guide: Guide; appendix?: React.
               {shortLocation(guide.app.website)} ↗
             </a>
           </p>
+          <ShareBar path={share.path} note={share.note} />
         </header>
 
         <section id="verdict" aria-labelledby="verdict-h">

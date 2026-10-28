@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { GenEvent } from "@/lib/generate/pipeline";
+import { ShareBar } from "./ShareBar";
 
 const STAGES = [
   { key: "research", label: "Research", idle: "Read the provider's developer docs, review rules and Composio's toolkit page" },
@@ -53,7 +54,8 @@ export function GenerateRun() {
             const ev = JSON.parse(line) as GenEvent;
             setEvents((prev) => [...prev, ev]);
             if (ev.t === "error") setError(ev.message);
-            if (ev.t === "done") setTimeout(() => router.push(ev.path), 1500);
+            // Pause long enough to see (and copy) the new link before opening the guide.
+            if (ev.t === "done") setTimeout(() => router.push(ev.path), 3500);
           }
         }
       } catch {
@@ -113,6 +115,7 @@ export function GenerateRun() {
             <Link href={cached.path}>Open it</Link>, or{" "}
             <a href={retry}>generate a fresh one</a> to watch the agent work.
           </p>
+          <ShareBar path={cached.path} />
         </div>
       )}
 
@@ -200,8 +203,9 @@ export function GenerateRun() {
                 {s.key === "save" && done?.t === "done" && (
                   <div className="stage-body">
                     <p>
-                      Done. Opening <Link href={done.path}>your guide</Link>…
+                      Done. Opening <Link href={done.path}>your guide</Link> in a moment…
                     </p>
+                    <ShareBar path={done.path} />
                   </div>
                 )}
               </li>

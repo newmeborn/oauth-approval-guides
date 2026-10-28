@@ -19,7 +19,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function GeneratedGuidePage({ params }: { params: Promise<{ id: string }> }) {
   const stored = await load((await params).id);
   if (!stored) notFound();
-  return <GuideView guide={stored.guide} appendix={<HowItWasMade stored={stored} />} />;
+  return (
+    <GuideView
+      guide={stored.guide}
+      share={{
+        path: `/g/${stored.id}`,
+        note: `Generated ${stored.createdAt.slice(0, 10)}. This link always shows this version, even if the guide is regenerated later.`,
+      }}
+      appendix={<HowItWasMade stored={stored} />}
+    />
+  );
 }
 
 /** The research trail, so a reader can judge the guide by how it was made. */

@@ -263,6 +263,25 @@ section > h2 { font-size: 1.3rem; margin: 28px 0 12px; }
 .guide #sources h3 { margin: 22px 0 10px; }
 .empty { color: var(--muted); }
 
+/* ---------- Share ---------- */
+.share-bar {
+  margin-top: 14px; padding: 10px 12px; display: grid; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius);
+}
+.share-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.share-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.share-row input {
+  flex: 1 1 220px; min-width: 0; font: 0.85rem var(--mono); padding: 7px 10px;
+  border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg); color: var(--text);
+}
+.share-row button {
+  font: inherit; font-size: 0.9rem; font-weight: 600; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--text); background: var(--text); color: var(--bg); min-width: 96px;
+}
+.share-row button.secondary { background: transparent; color: var(--text); }
+.share-note { margin: 0; font-size: 0.82rem; color: var(--muted); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 /* ---------- Checks ---------- */
 .checks { max-width: 820px; }
 .check-counts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
