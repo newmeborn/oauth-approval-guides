@@ -9,7 +9,7 @@
   "provenance": {
     "generatedBy": "human_verified",
     "lastChecked": "2026-10-28",
-    "summary": "Gated: serving anyone else's Instagram account needs Advanced Access, which requires both App Review and Business Verification, and end users must have a Business or Creator account. We tested the end-user side through Composio's managed app (it works today but shows \"Composio-IG\" to your users); the developer-side Meta portal run is still to come, so those steps are from Meta's docs."
+    "summary": "Gated: serving anyone else's Instagram account needs Advanced Access, which requires both App Review and Business Verification, and end users must have a Business or Creator account. I tested the end-user side through Composio's managed app (it works today but shows \"Composio-IG\" to your users); the developer-side Meta portal run was not done, so those steps are from Meta's docs."
   },
   "accessLevels": [
     {
@@ -124,7 +124,7 @@
           "meta-overview",
           "shot-connected-account"
         ],
-        "note": "\"Only supports Instagram Business and Creator accounts, not Instagram Personal accounts.\" Also shown in the Composio dashboard during our test."
+        "note": "\"Only supports Instagram Business and Creator accounts, not Instagram Personal accounts.\" Also shown in the Composio dashboard during the test."
       }
     },
     {
@@ -255,7 +255,7 @@
           "test-managed-connect",
           "meta-business-login"
         ],
-        "note": "Permission toggles observed on Instagram's consent screen during our managed-app test (2026-10-28)."
+        "note": "Permission toggles observed on Instagram's consent screen during the managed-app test (2026-10-28)."
       }
     },
     {
@@ -475,7 +475,7 @@
   ],
   "fallbackWhilePending": [
     {
-      "text": "Use Composio's managed Instagram app: it connected a real account end to end in our test, but users see \"Composio-IG\" on Instagram's consent screen.",
+      "text": "Use Composio's managed Instagram app: it connected a real account end to end in my test, but users see \"Composio-IG\" on Instagram's consent screen.",
       "evidence": {
         "label": "tested",
         "sourceIds": [
@@ -560,7 +560,7 @@
     },
     "notes": [
       {
-        "text": "The managed app requested publish, messages, comments and insights permissions from our non-tester account, each of which the user can switch off; so check granted permissions before posting.",
+        "text": "The managed app requested publish, messages, comments and insights permissions from a test account with no role on the app, each of which the user can switch off; so check granted permissions before posting.",
         "evidence": {
           "label": "tested",
           "sourceIds": [

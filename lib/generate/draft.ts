@@ -376,9 +376,17 @@ export function repair(guide: Guide): string[] {
     notes.push(`Applied ${orphans.length} gate(s) that no access level referenced to every level, to stay on the safe side.`);
   }
 
+  // A gate whose condition is a choice ("if you list on the Marketplace") is optional, so it
+  // can't stand in front of launch; the writer sometimes files it under launch anyway.
+  let optional = 0;
   guide.gates.forEach((g) => {
+    if (g.phase !== "scale" && g.threshold && /^(only\s+)?if you\b|^optional/i.test(g.threshold.trim())) {
+      g.phase = "scale";
+      optional++;
+    }
     if (g.phase === "scale" && !g.threshold) g.threshold = "usage threshold not stated";
   });
+  if (optional) notes.push(`Moved ${optional} optional gate(s) ("if you ...") out of the launch path.`);
 
   walkEstimates(guide, (est) => {
     if (est.min !== null && est.max !== null && est.min > est.max) [est.min, est.max] = [est.max, est.min];

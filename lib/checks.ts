@@ -30,6 +30,46 @@ export const RESULT_TEXT: Record<CheckResult, string> = {
 };
 
 export const CHECKS: Check[] = [
+  // Caught in a pre-submission review of the live site; each fix is in code, then the guide was regenerated.
+  {
+    app: "Gmail (generated)",
+    claim: "Reading and modifying email is Light review.",
+    method: "source",
+    result: "corrected",
+    detail:
+      "Caught in a pre-submission review. Google's Gmail scope page lists gmail.readonly and gmail.modify under \"Restricted scopes\", and Google says apps reaching restricted data through a third-party server \"must undergo an annual security assessment by a Google-approved third party.\" A code check now reads scope pages' headings and adds the security-review gate itself; the regenerated guide rates both levels Security review.",
+    links: [
+      { label: "Gmail API scopes", href: "https://developers.google.com/workspace/gmail/api/auth/scopes" },
+      { label: "Google: restricted scope verification", href: "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification" },
+    ],
+  },
+  {
+    app: "Slack (generated)",
+    claim: "Reading message history is self-serve.",
+    method: "source",
+    result: "corrected",
+    detail:
+      "Caught in a pre-submission review and confirmed in Slack's changelog: since May 29, 2025, commercially distributed apps not approved for the Slack Marketplace get 1 request per minute and at most 15 objects from conversations.history and conversations.replies. The generator now always reads that page for Slack, and the regenerated guide rates reading history Light review (Marketplace approval).",
+    links: [{ label: "Slack changelog", href: "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps" }],
+  },
+  {
+    app: "X (generated)",
+    claim: "\"You can launch your X integration immediately\", in a guide whose badges said Gated.",
+    method: "generator",
+    result: "corrected",
+    detail:
+      "The model wrote both the summary and the gates, and they disagreed. Now code writes the verdict sentence from the computed tiers and the model adds only the key point, so a summary can't contradict its badges. X's pricing page is also always read, because pricing decides X's tier.",
+    links: [{ label: "X pricing", href: "https://docs.x.com/x-api/getting-started/pricing" }],
+  },
+  {
+    app: "Zoom (generated)",
+    claim: "A Self-serve badge while the \"no review\" claim was Unverified.",
+    method: "generator",
+    result: "corrected",
+    detail:
+      "The badge looked more certain than its evidence. It now reads \"Self-serve · unconfirmed\" whenever no page about app review was read. The same review found the fetcher had received some Google pages in Korean and Hindi; it now asks for English, and the rerun read Zoom's publishing pages and rated managing meetings Light review.",
+    links: [],
+  },
   {
     app: "Instagram",
     claim: "Composio's managed app shows Composio's branding to your users, which is the main reason to bring your own app.",
@@ -46,12 +86,12 @@ export const CHECKS: Check[] = [
     claim: "End users can switch off individual permissions on the consent screen.",
     method: "hands_on",
     result: "discovered",
-    detail: "Not in the docs we read. Everything except basic profile had a toggle, so a connection can succeed with publishing off. The guide now tells you to check granted permissions before posting.",
+    detail: "Not in the docs I read. Everything except basic profile had a toggle, so a connection can succeed with publishing off. The guide now tells you to check granted permissions before posting.",
     links: [{ label: "Test log", href: "/evidence/instagram/2026-10-28-managed-connect.md" }],
   },
   {
     app: "Instagram",
-    claim: "Our inference: Composio's managed app has passed Meta App Review for publishing and messaging.",
+    claim: "My inference: Composio's managed app has passed Meta App Review for publishing and messaging.",
     method: "source",
     result: "corrected",
     detail: "Composio's own toolkit page says some permissions (e.g. replying to comments) aren't approved on the managed app and that \"an owned Meta app is the current unblock path for production usage.\" The guide now says so.",
@@ -136,7 +176,7 @@ export const CHECKS: Check[] = [
     links: [],
   },
   {
-    app: "Gemini (our own stack)",
+    app: "Gemini (the generator's own stack)",
     claim: "Gemini 2.5 Flash offers free Google Search grounding.",
     method: "hands_on",
     result: "corrected",

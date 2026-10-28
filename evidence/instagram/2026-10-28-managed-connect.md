@@ -3,7 +3,7 @@
 - **Date:** 2026-10-28
 - **Who:** the author, acting as an end user. A human did every login and clicked Allow.
 - **What:** connected a test Instagram account to Composio's managed Instagram OAuth app from the Composio dashboard.
-- **Not covered:** registering our own Meta developer app. That is the developer side, and it was not run for this submission.
+- **Not covered:** registering my own Meta developer app. That is the developer side, and it was not run for this submission.
 
 ## Flow observed
 
@@ -18,7 +18,7 @@
 ## Findings (evidence label: tested, unless stated)
 
 1. **The managed app is branded as Composio twice:** once on Composio's Connect Link, and again as "Composio-IG" on Instagram's own consent screen. This is the main reason to go custom.
-2. **Composio's managed app requested publish, messaging, comments and insights permissions from an account with no role on the app.** At first we inferred that Composio had passed App Review for all of these (`unverified`). Composio's toolkit page later corrected that: some permissions aren't approved on the managed app, and "an owned Meta app is the current unblock path for production usage".
+2. **Composio's managed app requested publish, messaging, comments and insights permissions from an account with no role on the app.** At first I inferred that Composio had passed App Review for all of these (`unverified`). Composio's toolkit page later corrected that: some permissions aren't approved on the managed app, and "an owned Meta app is the current unblock path for production usage".
 3. **Users can switch off every permission except basic profile.** A connection can succeed while publishing is off, so an agent has to check which permissions were actually granted before it tries to post.
 4. **The Composio toolkit page says only Business and Creator accounts are supported** (`documented`, seen in the dashboard).
 5. **The captcha and the email code are login security, not approval.** Mark these steps as end-user-only in any guide.

@@ -33,7 +33,7 @@ export default async function Home() {
       <section id="library" aria-labelledby="library-h">
         <h2 id="library-h">Library</h2>
         <p className="sec-q">
-          Researched guides, held to the evidence rules. <Link href="/checks">How we checked them</Link>.
+          Researched guides, held to the evidence rules. <Link href="/checks">How I checked them</Link>.
         </p>
         <div className="cards">
           {guides.map((g) => (

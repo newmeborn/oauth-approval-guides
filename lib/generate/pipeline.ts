@@ -57,6 +57,8 @@ const POLICY_PAGES: Record<string, string[]> = {
   gmail: ["https://developers.google.com/workspace/gmail/api/auth/scopes"],
   "google-drive": ["https://developers.google.com/workspace/drive/api/guides/api-specific-auth"],
   googledrive: ["https://developers.google.com/workspace/drive/api/guides/api-specific-auth"],
+  // Pricing decides the tier for paid APIs.
+  "x.com": ["https://docs.x.com/x-api/getting-started/pricing"],
 };
 
 /** Try each model in turn while the failure is capacity, not a real error. */

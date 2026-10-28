@@ -3,8 +3,8 @@ import Link from "next/link";
 import { CHECKS, METHOD_TEXT, RESULT_TEXT, RUNS, type CheckResult } from "@/lib/checks";
 
 export const metadata: Metadata = {
-  title: "How we checked the guides",
-  description: "A sample of the guidance checked against real sources and setup attempts: what held up, what we corrected, and what we couldn't verify.",
+  title: "How I checked the guides",
+  description: "A sample of the guidance checked against real sources and setup attempts: what held up, what I corrected, and what I couldn't verify.",
 };
 
 const ORDER: CheckResult[] = ["corrected", "discovered", "confirmed", "unverifiable", "pending"];
@@ -18,10 +18,10 @@ export default function ChecksPage() {
         <p className="crumb">
           <Link href="/#library">Library</Link> / Checks
         </p>
-        <h1>How we checked the guides</h1>
+        <h1>How I checked the guides</h1>
         <p className="lede">
-          We tested what we could by hand, held the rest to its sources, and ran the live agent until its mistakes stopped
-          surprising us. Here is a sample of claims we checked, including the ones we got wrong.
+          I tested what I could by hand, held the rest to its sources, and ran the live agent until its mistakes stopped
+          surprising me. Here is a sample of claims I checked, including the ones I got wrong.
         </p>
         <p className="check-counts">
           {counts.map(({ r, n }) => (
@@ -64,7 +64,7 @@ export default function ChecksPage() {
       <section aria-labelledby="runs-h">
         <h2 id="runs-h">The live agent, run by run</h2>
         <p className="sec-q">
-          Every fix to the generator came from watching it get something wrong. Pages read are pages our code actually fetched;
+          Every fix to the generator came from watching it get something wrong. Pages read are pages the code actually fetched;
           quotes are checked word for word against them.
         </p>
         <div className="table-wrap">
@@ -92,11 +92,11 @@ export default function ChecksPage() {
       </section>
 
       <section aria-labelledby="limits-h">
-        <h2 id="limits-h">What we couldn&apos;t verify</h2>
+        <h2 id="limits-h">What I couldn&apos;t verify</h2>
         <ul className="claims">
           <li>Approval wait times. Providers publish typical figures (Google: 3-5 business days; Notion: 5-10) or none (Meta, Discord); developers report much longer stalls. Guides show open-ended ranges and label the source of each figure.</li>
           <li>Developer-portal runs. I did not register apps in the Discord, Google or Meta portals; only the Instagram end-user flow was tested by hand, and no provider approvals were completed.</li>
-          <li>Sites that block automated reading. Zoom&apos;s developer site reset most connections from our machine, so its generated guide says what it couldn&apos;t read instead of guessing.</li>
+          <li>Sites that block automated reading. Zoom&apos;s developer site reset most connections from my machine, so its generated guide says what it couldn&apos;t read instead of guessing.</li>
         </ul>
       </section>
     </article>

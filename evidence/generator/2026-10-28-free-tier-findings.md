@@ -11,7 +11,7 @@
 | Research with Gemini 2.5 Flash + Google Search | Free, 500 grounded requests/day ([pricing page](https://ai.google.dev/gemini-api/docs/pricing)) | 404: "no longer available to new users". 2.5 Flash-Lite: the same. | tested |
 | Search with Gemini 3 models instead | Grounding "Not available" in the free tier | 429 on 3.8 Flash, 3.6 Flash and 3.5 Flash-Lite with `google_search` | tested |
 | Let Gemini read pages (URL context tool) | Supported, combinable with search | Works, but unreliable: 13 of 15 pages failed in one Notion run, including pages that loaded in an earlier probe | tested |
-| Plain `fetch()` from our server | — | 8 of 8 provider pages loaded (Notion, Composio, Google, Discord, Meta), with redirects followed | tested |
+| Plain `fetch()` from the app's server | — | 8 of 8 provider pages loaded (Notion, Composio, Google, Discord, Meta), with redirects followed | tested |
 | Write the guide with 3.8 Flash | Free | Hung until a 150 s timeout with no response; 3.6 Flash and 3.5 Flash-Lite answered in 9 to 14 s | tested |
 
 **Lesson for the write-up.** Even for an LLM API, documentation and reality diverged three times in one afternoon. That is the brief's own thesis, so the generator is built not to trust model tools: code fetches the pages, and the model only reads what code hands it.
@@ -47,7 +47,7 @@ The fallback order is 3.6 Flash, then 3.5 Flash-Lite, on 503, 429, timeout or "n
 | Zoom 2 | 9 | 16 / 0 | Coverage check fired: 2 "no wait" claims marked Unverified; open questions ask about publishing review | — |
 
 **What the code now verifies, beyond the schema:**
-1. Every source is a page our code fetched; the model can't cite anything else.
+1. Every source is a page the code fetched; the model can't cite anything else.
 2. Each source's kind is decided from its domain.
 3. Each Documented or Reported claim's quote must appear word for word on the page it cites (64 of 69 checked quotes matched across the runs above).
 4. "No wait" claims need a review page to have been read.

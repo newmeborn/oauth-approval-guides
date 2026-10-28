@@ -3,10 +3,10 @@ import type { AccessLevel, Estimate, EvidenceLabel, GateKind, Guide } from "./sc
 import { TIER_LABEL, verdictFor, type Tier, type Verdict } from "./tiers";
 
 export const EVIDENCE_TEXT: Record<EvidenceLabel, { label: string; meaning: string }> = {
-  tested: { label: "Tested", meaning: "We did it ourselves; screenshot or test log attached." },
+  tested: { label: "Tested", meaning: "Done by hand; screenshot or test log attached." },
   documented: { label: "Documented", meaning: "An official provider or Composio page says so." },
   reported: { label: "Reported", meaning: "Community sources: forums, blogs, Stack Overflow." },
-  unverified: { label: "Unverified", meaning: "Inference, or a source we could not read. Check before relying on it." },
+  unverified: { label: "Unverified", meaning: "Inference, or a source that could not be read. Check before relying on it." },
 };
 
 export const TIER_MEANING: Record<Tier, string> = {

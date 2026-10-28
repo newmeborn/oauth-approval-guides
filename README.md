@@ -2,9 +2,9 @@
 
 Guides that tell a developer building an AI agent how hard it is to get an OAuth app ready with a provider, how long it takes (their own work vs waiting for approval), what can block approval, and which steps an agent can do for them. Look up an app in the library, or type any app and watch an agent research it and write a shareable guide in about a minute.
 
-**Live:** https://oauth-approval-guides.vercel.app · **How we checked the guides:** https://oauth-approval-guides.vercel.app/checks
+**Live:** https://oauth-approval-guides.vercel.app · **How I checked the guides:** https://oauth-approval-guides.vercel.app/checks
 
-## The problem, and the scope we chose
+## The problem, and the scope I chose
 
 Composio gives developers managed OAuth apps, so prototypes work immediately. Production is different: to show your own brand on the consent screen, use custom scopes or get dedicated rate limits, you register your own OAuth app with each provider. Some providers then review it. That step is where developers stall, because the hard part isn't the console clicks (Composio's existing guides cover those). It's not knowing whether you face an hour of setup or weeks of review, and what will get you rejected.
 
@@ -29,7 +29,7 @@ So the scope is **the approval path, not the console walkthrough**:
 |---|---|
 | **Library** | Discord (self-serve, then light review at 100 servers), Google Calendar (sensitive-scope verification), Instagram (gated: App Review plus Business Verification). The Instagram end-user flow was tested by hand; the rest is from provider docs. |
 | **Live generator** | Type an app name or website. Progress streams live: which pages it planned, fetched or couldn't load, and what the checker corrected. The result is saved at a shareable `/g/<id>` link. |
-| **Checks page** | A sample of claims checked against sources and setup attempts: what held up, what we corrected, what we couldn't verify, plus a run-by-run record of the generator. |
+| **Checks page** | A sample of claims checked against sources and setup attempts: what held up, what I corrected, what I couldn't verify, plus a run-by-run record of the generator. |
 
 ## Key decisions
 
@@ -41,9 +41,9 @@ So the scope is **the approval path, not the console walkthrough**:
   - **Write:** the model writes the guide citing only pages code fetched (`s1..sN`).
   - **Check:** code checks the result.
 
-  We started with the model's own search and page-reading tools. Testing showed they were unavailable or unreliable on the free tier (see Checks), so code took over everything that can be verified.
+  I started with the model's own search and page-reading tools. Testing showed they were unavailable or unreliable on the free tier (see Checks), so code took over everything that can be verified.
 - **Code checks the agent's evidence:**
-  - Every source must be a page our code actually fetched.
+  - Every source must be a page the code actually fetched.
   - Code decides each source's kind (provider docs, Composio docs or community) from its domain.
   - Every Documented or Reported claim must quote its page, and code finds the quote word for word or downgrades the claim.
   - "No approval wait" can't be Documented unless a page about review or publishing was read.
@@ -53,7 +53,7 @@ So the scope is **the approval path, not the console walkthrough**:
 
 ## What was tested, what sources support, what's uncertain
 
-- **Tested by hand:** connecting a real Instagram account through Composio's managed app (screenshots and a test log in `evidence/instagram/`). It showed Composio's branding twice and per-permission toggles on Meta's consent screen, which the docs we read don't mention.
+- **Tested by hand:** connecting a real Instagram account through Composio's managed app (screenshots and a test log in `evidence/instagram/`). It showed Composio's branding twice and per-permission toggles on Meta's consent screen, which the docs I read don't mention.
 - **Tested on the generator:** six runs across Notion, X and Zoom, each failure leading to a fix (`evidence/generator/`). 64 of 69 checked quotes matched their pages word for word.
 - **From sources:** everything else, labelled Documented (provider or Composio page) or Reported (community), with links and access dates.
 - **Uncertain**, and shown as open questions in the guides:
