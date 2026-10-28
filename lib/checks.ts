@@ -193,4 +193,10 @@ export const RUNS = [
   { run: "X 2", pages: 7, quotes: "23 matched, 1 downgraded", outcome: "Gated: pay-per-use credits detected" },
   { run: "Zoom 1", pages: 4, quotes: "15 matched", outcome: "Wrongly Documented \"no wait\"; led to the coverage check" },
   { run: "Zoom 2", pages: 9, quotes: "16 matched", outcome: "\"No wait\" marked Unverified; asks about publishing review" },
+  // Final runs, after the fixes from the pre-submission review.
+  { run: "Gmail (final)", pages: 17, quotes: "32 matched, 3 downgraded", outcome: "Security review at launch: restricted scopes" },
+  { run: "Slack (final)", pages: 16, quotes: "13 matched", outcome: "Reading history needs Marketplace approval (rate limits)" },
+  { run: "Zoom (final)", pages: 12, quotes: "27 matched, 2 downgraded", outcome: "Publishing review found; managing meetings is Light review" },
+  { run: "X (final)", pages: 10, quotes: "22 matched, 2 downgraded", outcome: "Gated: credit purchase; AI-reply approval for posting" },
+  { run: "Notion (final)", pages: 12, quotes: "21 matched", outcome: "Self-serve; Light review only if listed on the Marketplace" },
 ];
