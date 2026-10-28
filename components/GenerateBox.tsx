@@ -32,8 +32,8 @@ export function GenerateBox() {
         </button>
       </div>
       <p className="gen-hint">
-        An agent reads the provider&apos;s docs and community reports live, in about one to three minutes, and gives you a link
-        to share. Generated guides cite their sources but nothing in them is tested by hand.
+        An agent reads the provider&apos;s own docs live, in about a minute, and gives you a link to share. Every quote is
+        checked against the page it cites; nothing in a generated guide is tested by hand.
       </p>
     </form>
   );

@@ -2,7 +2,7 @@
 
 Guides that tell a developer building an AI agent how hard it is to get an OAuth app ready with a provider, how long it takes (their own work vs waiting for approval), what can block approval, and which steps an agent can do for them. Look up an app in the library, or type any app and watch an agent research it and write a shareable guide in about a minute.
 
-**Live:** _link added on deploy_ · **How we checked the guides:** `/checks` on the live site
+**Live:** https://oauth-approval-guides.vercel.app · **How we checked the guides:** https://oauth-approval-guides.vercel.app/checks
 
 ## The problem, and the scope we chose
 
